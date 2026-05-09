@@ -175,7 +175,23 @@ def solution(queries):
             # Store snapshot in backups[int(ts)].
             # Return the count of non-expired (key, field) pairs as a string.
             # See spec/level4.md
-            raise NotImplementedError("BACKUP — see spec/level4.md")
+            snapshot = {}
+            count = 0
+            for key, fields in db.items():
+                if key not in snapshot:
+                        snapshot[key] = {}
+
+                for field, (value, expiry_ts) in fields.items():
+                    if expiry_ts is None:
+                        snapshot[key][field] = (value, None)
+                        count += 1
+                    elif expiry_ts > int(ts):
+                        snapshot[key][field] = (value, expiry_ts - int(ts))
+                        count += 1
+                    else:
+                        pass  # drop expired entries
+            backups[str(ts)] = snapshot
+            out.append(str(count))
 
         elif op == "RESTORE":
             # q is ["RESTORE", ts, backup_ts]
@@ -185,7 +201,22 @@ def solution(queries):
             # If no snapshot at backup_ts, do nothing.
             # Returns "" in both cases.
             # See spec/level4.md
-            raise NotImplementedError("RESTORE — see spec/level4.md")
+            if str(backup_ts) not in backups:
+                out.append("")
+
+            else:  
+                snapshot = backups[str(backup_ts)]
+                new_db = {}
+                for key, fields in snapshot.items():
+                    if key not in new_db:
+                        new_db[key] = {}
+                    for field, (value, remaining_ttl) in fields.items():
+                        if remaining_ttl is None:
+                            new_db[key][field] = (value, None)
+                        else:
+                            new_db[key][field] = (value, int(ts) + remaining_ttl)
+                db = new_db
+                out.append("")
 
         else:
             raise ValueError(f"Unknown op: {op}")
