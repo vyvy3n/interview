@@ -82,10 +82,12 @@ def get_factors(n):
 
 ## Practice
 
-- [Subsets](https://leetcode.com/problems/subsets/) · [Permutations](https://leetcode.com/problems/permutations/) · [Combination Sum](https://leetcode.com/problems/combination-sum/)
-- [Letter Combinations of a Phone Number](https://leetcode.com/problems/letter-combinations-of-a-phone-number/)
-- [Factorization](https://www.lintcode.com/problem/factorization/)
-- [Word Squares](https://www.lintcode.com/problem/word-squares/)
-- [Expression Add Operators](https://leetcode.com/problems/expression-add-operators/)
-- [Word Ladder II](https://leetcode.com/problems/word-ladder-ii/)
-- [N-Queens](https://leetcode.com/problems/n-queens/)
+- **Subsets** — all 2^n subsets of `nums`. *Insight:* canonical backtracking — at each `i`, choose to include or skip; snapshot `path[:]` at every node. [LC 78](https://leetcode.com/problems/subsets/)
+- **Permutations** — all n! orderings of `nums`. *Insight:* track a `used[]` bitmap; in each frame iterate all unused indices. [LC 46](https://leetcode.com/problems/permutations/)
+- **Combination Sum** — all combinations summing to target (unlimited reuse). *Insight:* recurse with same `start` index (allows reuse); subtract candidate from remaining sum. [LC 39](https://leetcode.com/problems/combination-sum/)
+- **Letter Combinations of a Phone Number** — given digits `2-9`, all letter combos (T9 keypad). *Insight:* DFS with index `i` over digits; for each digit, branch over its letter set. [LC 17](https://leetcode.com/problems/letter-combinations-of-a-phone-number/)
+- **Factorization** — all multiplicative factorizations of `n` (excluding `n × 1`). *Insight:* DFS over factors `f ∈ [start, √remain]`; pass `f` as next start to avoid duplicate orderings; also try `remain` itself as the final factor. [LintCode 652](https://www.lintcode.com/problem/factorization/)
+- **Word Squares** — build NxN grid of words where row `i` == column `i`. *Insight:* DFS row-by-row; the next row must start with the prefix formed by column letters above — bucket words by prefix (or trie) to look up candidates O(1). [LintCode 634](https://www.lintcode.com/problem/word-squares/)
+- **Expression Add Operators** — insert `+ - *` between digits of `num` so the expression equals target. *Insight:* DFS over split points; carry running `total` and `prev` (so `*` can undo last addition); careful with leading-zero numbers. [LC 282](https://leetcode.com/problems/expression-add-operators/)
+- **Word Ladder II** — *all* shortest transformation chains from `begin` to `end`. *Insight:* BFS first to compute distance from `end` to every word; then DFS from `begin`, only stepping to neighbors with `dist == cur_dist - 1`. [LC 126](https://leetcode.com/problems/word-ladder-ii/)
+- **N-Queens** — place N queens on NxN so none attack. *Insight:* row-by-row DFS; track occupied columns + 2 diagonals as sets `(c, r-c, r+c)` for O(1) attack check. [LC 51](https://leetcode.com/problems/n-queens/)

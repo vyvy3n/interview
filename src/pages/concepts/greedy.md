@@ -98,10 +98,12 @@ def min_rooms(intervals):
 
 ## Practice
 
-- [Merge Intervals](https://leetcode.com/problems/merge-intervals/) · [Insert Interval](https://leetcode.com/problems/insert-interval/)
-- [Non-overlapping Intervals](https://leetcode.com/problems/non-overlapping-intervals/)
-- [Meeting Rooms II](https://leetcode.com/problems/meeting-rooms-ii/)
-- [Jump Game](https://leetcode.com/problems/jump-game/) · [Jump Game II](https://leetcode.com/problems/jump-game-ii/)
-- [Gas Station](https://leetcode.com/problems/gas-station/)
-- [Task Scheduler](https://leetcode.com/problems/task-scheduler/)
-- [Best Time to Buy and Sell Stock](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/)
+- **Merge Intervals** — merge all overlapping intervals. *Insight:* sort by start; for each interval either extend the last merged or push new. [LC 56](https://leetcode.com/problems/merge-intervals/)
+- **Insert Interval** — insert into a sorted non-overlapping list. *Insight:* three phases: copy pre-overlap, merge while overlapping, copy post. [LC 57](https://leetcode.com/problems/insert-interval/)
+- **Non-overlapping Intervals** — min number of intervals to remove so the rest don't overlap. *Insight:* sort by **end** time; greedily keep the earliest-ending non-conflicting interval. [LC 435](https://leetcode.com/problems/non-overlapping-intervals/)
+- **Meeting Rooms II** — minimum number of rooms for the given meetings. *Insight:* sort by start, min-heap of end times; reuse a room when its end ≤ current start. [LC 253](https://leetcode.com/problems/meeting-rooms-ii/)
+- **Jump Game** — can you reach the last index given `nums[i]` is max jump? *Insight:* track furthest reachable; fail if `i > reach`. [LC 55](https://leetcode.com/problems/jump-game/)
+- **Jump Game II** — minimum jumps to reach last index. *Insight:* implicit BFS — track current "frontier end" and "next frontier end"; bump jump count when you cross the frontier. [LC 45](https://leetcode.com/problems/jump-game-ii/)
+- **Gas Station** — circular array; find start station to complete loop, or -1. *Insight:* if total gas ≥ total cost, answer exists; reset start to `i+1` whenever running tank goes negative. [LC 134](https://leetcode.com/problems/gas-station/)
+- **Task Scheduler** — schedule tasks with cooldown `n` between same-letter tasks. *Insight:* most-frequent task dominates: `(max_freq - 1) * (n + 1) + count_of_max_freq_tasks`. [LC 621](https://leetcode.com/problems/task-scheduler/)
+- **Best Time to Buy and Sell Stock** — max profit from one buy + sell. *Insight:* sweep prices, track running min, update best `price - min`. [LC 121](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/)

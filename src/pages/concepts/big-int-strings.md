@@ -97,8 +97,11 @@ def plus_one(head):
 
 ## Practice
 
-- [Add Strings](https://leetcode.com/problems/add-strings/) · [Add Binary](https://leetcode.com/problems/add-binary/)
-- [Multiply Strings](https://leetcode.com/problems/multiply-strings/)
-- [Plus One](https://leetcode.com/problems/plus-one/) · [Plus One Linked List](https://www.lintcode.com/problem/plus-one-linked-list/)
-- [Add Two Numbers](https://leetcode.com/problems/add-two-numbers/) (linked list)
-- [String to Integer (atoi)](https://leetcode.com/problems/string-to-integer-atoi/)
+- **Add Strings** — sum two non-negative integers given as strings. *Insight:* iterate from the right with `carry`; final loop condition `or carry` catches the last carry-out. [LC 415](https://leetcode.com/problems/add-strings/)
+- **Add Binary** — same but in base 2. *Insight:* identical pattern with `divmod(d, 2)`. [LC 67](https://leetcode.com/problems/add-binary/)
+- **Multiply Strings** — string × string. *Insight:* result fits in `len(a) + len(b)` digits; digit `(i,j)` contributes to positions `i+j` (high) and `i+j+1` (low). [LC 43](https://leetcode.com/problems/multiply-strings/)
+- **Plus One** — add 1 to integer represented as digit array. *Insight:* sweep right, propagate carry; if all 9s, prepend 1. [LC 66](https://leetcode.com/problems/plus-one/)
+- **Plus One Linked List** — same on a singly linked list (most significant first). *Insight:* recurse to the tail, add 1 returning carry up; or reverse → add → reverse. [LintCode 904](https://www.lintcode.com/problem/plus-one-linked-list/)
+- **Add Two Numbers** — sum two integers given as linked lists in *reverse* (least-significant first). *Insight:* walk both with `carry`; build the result list as you go. [LC 2](https://leetcode.com/problems/add-two-numbers/)
+- **String to Integer (atoi)** — parse signed integer from messy string with whitespace + clamping. *Insight:* state-machine — skip whitespace, read sign, accumulate digits, clamp to 32-bit range. [LC 8](https://leetcode.com/problems/string-to-integer-atoi/)
+- **Subtract Strings** — `a - b` where both can be huge. *Insight:* compare magnitudes first; subtract smaller from larger with borrow; flip sign if needed. [Variant of LC 415]

@@ -101,8 +101,10 @@ When start and end both known and graph is huge: expand from both sides, swap to
 
 ## Practice
 
-- [Knight Shortest Path](https://www.lintcode.com/problem/knight-shortest-path/) · [Shortest Path in Binary Matrix](https://leetcode.com/problems/shortest-path-in-binary-matrix/)
-- [Word Ladder](https://leetcode.com/problems/word-ladder/) · [Sliding Puzzle](https://leetcode.com/problems/sliding-puzzle/)
-- [Walls and Gates](https://www.lintcode.com/problem/walls-and-gates) · [Rotting Oranges](https://leetcode.com/problems/rotting-oranges/)
-- [Snakes and Ladders](https://leetcode.com/problems/snakes-and-ladders/)
-- [Open the Lock](https://leetcode.com/problems/open-the-lock/) (bidirectional BFS shines)
+- **Knight Shortest Path** / **Shortest Path in Binary Matrix** — fewest steps for a knight (or 8-directional walk) from start to end on a grid. *Insight:* layered BFS with the 8 knight moves (or 8 neighbors); first-visit distance is shortest. [LintCode](https://www.lintcode.com/problem/knight-shortest-path/) · [LC 1091](https://leetcode.com/problems/shortest-path-in-binary-matrix/)
+- **Word Ladder** — fewest single-letter transformations from `begin` to `end` through valid words. *Insight:* implicit graph; bucket words by wildcard pattern `h*t` so neighbors are O(1) lookup, not O(words × len). [LC 127](https://leetcode.com/problems/word-ladder/)
+- **Sliding Puzzle** — fewest moves to solve a 2×3 board to target state. *Insight:* state = string of 6 chars; precompute valid swaps for each empty position; BFS on states. [LC 773](https://leetcode.com/problems/sliding-puzzle/)
+- **Walls and Gates** — fill each empty room with distance to nearest gate. *Insight:* multi-source BFS — push all gates at step 0; first visit = shortest distance; mutate grid in place. [LintCode 663](https://www.lintcode.com/problem/walls-and-gates)
+- **Rotting Oranges** — minutes until all fresh oranges rot (rotten ones spread to 4 neighbors). *Insight:* multi-source BFS from all initial rotten cells; track time per layer. [LC 994](https://leetcode.com/problems/rotting-oranges/)
+- **Snakes and Ladders** — fewest dice rolls to reach square N². *Insight:* BFS from square 1; for each square consider rolls 1–6, jump if landing on a snake/ladder. [LC 909](https://leetcode.com/problems/snakes-and-ladders/)
+- **Open the Lock** — fewest 4-digit dial moves to reach target, avoiding "deadends". *Insight:* BFS on state strings; each state has 8 neighbors (each digit ±1). Bidirectional BFS halves the radius. [LC 752](https://leetcode.com/problems/open-the-lock/)

@@ -90,9 +90,11 @@ Counter(a).most_common(3)  # top 3
 
 ## Practice
 
-- [Two Sum](https://leetcode.com/problems/two-sum/) · [4Sum II](https://leetcode.com/problems/4sum-ii/) (split-into-two-halves hash)
-- [Group Anagrams](https://leetcode.com/problems/group-anagrams/)
-- [Subarray Sum Equals K](https://leetcode.com/problems/subarray-sum-equals-k/)
-- [Longest Substring with At Most K Distinct Characters](https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/)
-- [Continuous Subarray Sum](https://leetcode.com/problems/continuous-subarray-sum/) (mod K)
-- [Find All Anagrams in a String](https://leetcode.com/problems/find-all-anagrams-in-a-string/)
+- **Two Sum** — indices of two numbers summing to target. *Insight:* one-pass hash; check `target - x` *before* inserting `x`. [LC 1](https://leetcode.com/problems/two-sum/)
+- **4Sum II** — count tuples `(i,j,k,l)` from 4 arrays where `A+B+C+D=0`. *Insight:* hash sums of pairs from the first two arrays; lookup `-(C+D)` from pairs of last two. O(n²) instead of O(n⁴). [LC 454](https://leetcode.com/problems/4sum-ii/)
+- **Group Anagrams** — group strings that are anagrams of each other. *Insight:* hash key = sorted string OR 26-tuple of counts. [LC 49](https://leetcode.com/problems/group-anagrams/)
+- **Subarray Sum Equals K** — count subarrays summing to K. *Insight:* hash of `prefix_sum → count`; for each prefix, add count of `prefix - k` previously seen. [LC 560](https://leetcode.com/problems/subarray-sum-equals-k/)
+- **Longest Substring with At Most K Distinct Chars** — longest substring containing ≤K distinct. *Insight:* sliding window + counter dict; shrink from left while distinct count > K. [LC 340](https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/)
+- **Continuous Subarray Sum** — any subarray length ≥ 2 summing to a multiple of K? *Insight:* prefix mod K; if same mod seen at indices ≥ 2 apart, slice between is divisible by K. [LC 523](https://leetcode.com/problems/continuous-subarray-sum/)
+- **Find All Anagrams in a String** — start indices of all anagrams of `p` in `s`. *Insight:* fixed-window of `len(p)`; compare 26-letter count vector to `p`'s. [LC 438](https://leetcode.com/problems/find-all-anagrams-in-a-string/)
+- **Longest Consecutive Sequence** — longest run of consecutive ints in unsorted array (O(n)). *Insight:* hash all nums; only start counting from `x` if `x-1` is not in set (avoid duplicate work). [LC 128](https://leetcode.com/problems/longest-consecutive-sequence/)

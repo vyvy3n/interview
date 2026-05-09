@@ -115,10 +115,13 @@ Sentinels mean you never check for None at the boundaries.
 
 ## Practice
 
-- [Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/) · [Reverse Nodes in k-Group](https://leetcode.com/problems/reverse-nodes-in-k-group/)
-- [Linked List Cycle](https://leetcode.com/problems/linked-list-cycle/) · [Linked List Cycle II](https://leetcode.com/problems/linked-list-cycle-ii/)
-- [Merge Two Sorted Lists](https://leetcode.com/problems/merge-two-sorted-lists/) · [Merge K Sorted Lists](https://leetcode.com/problems/merge-k-sorted-lists/)
-- [Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list/)
-- [Copy List with Random Pointer](https://leetcode.com/problems/copy-list-with-random-pointer/)
-- [Reorder List](https://leetcode.com/problems/reorder-list/)
-- [LRU Cache](https://leetcode.com/problems/lru-cache/) — see [LRU page](/concepts/lru-cache)
+- **Reverse Linked List** — reverse in place. *Insight:* three-pointer iteration `(prev, cur, nxt)`; return `prev`. [LC 206](https://leetcode.com/problems/reverse-linked-list/)
+- **Reverse Nodes in k-Group** — reverse every k consecutive nodes (skip last group if shorter). *Insight:* check k nodes ahead exist; reverse k nodes; recurse on rest with the new tail's `next`. [LC 25](https://leetcode.com/problems/reverse-nodes-in-k-group/)
+- **Linked List Cycle** — does the list cycle? *Insight:* fast/slow Floyd; they meet iff cycle. [LC 141](https://leetcode.com/problems/linked-list-cycle/)
+- **Linked List Cycle II** — return cycle start node. *Insight:* after Floyd meet, reset one pointer to head; advance both at speed 1; meeting point is cycle start. [LC 142](https://leetcode.com/problems/linked-list-cycle-ii/)
+- **Merge Two Sorted Lists** — merge two sorted lists. *Insight:* dummy head + tail pointer; pick smaller, advance. [LC 21](https://leetcode.com/problems/merge-two-sorted-lists/)
+- **Merge K Sorted Lists** — merge k sorted lists. *Insight:* min-heap of `(val, idx, node)` across heads; pop, push next. O(N log k). [LC 23](https://leetcode.com/problems/merge-k-sorted-lists/)
+- **Remove Nth Node From End** — drop the n-th from the end in one pass. *Insight:* dummy head + two pointers, `right` advances n steps first; then both advance until right hits end. [LC 19](https://leetcode.com/problems/remove-nth-node-from-end-of-list/)
+- **Copy List with Random Pointer** — deep-copy list where each node has a `random` pointer. *Insight:* pass 1 — interleave copy nodes after originals; pass 2 — set `copy.random`; pass 3 — un-interleave. (Or hash original→copy.) [LC 138](https://leetcode.com/problems/copy-list-with-random-pointer/)
+- **Reorder List** — `1→2→…→n` becomes `1→n→2→n-1…`. *Insight:* find middle (fast/slow); reverse second half; merge alternating. [LC 143](https://leetcode.com/problems/reorder-list/)
+- **LRU Cache** — see the [full LRU page](/concepts/lru-cache). [LC 146](https://leetcode.com/problems/lru-cache/)

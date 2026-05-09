@@ -91,8 +91,9 @@ def fib(n):
 
 ## Practice
 
-- [Pow(x, n)](https://leetcode.com/problems/powx-n/)
-- [Fast Power](https://www.lintcode.com/problem/fast-power/)
-- [Super Pow](https://leetcode.com/problems/super-pow/) (digit-by-digit exponent)
-- [Fibonacci Number](https://leetcode.com/problems/fibonacci-number/) (try matrix-power solution)
-- [Count Different Palindromic Subsequences](https://leetcode.com/problems/count-different-palindromic-subsequences/) (uses mod arithmetic)
+- **Pow(x, n)** — compute `x^n` with `x` float, `n` int (possibly negative). *Insight:* fast power on `|n|`; if `n < 0` use `1/x` and `-n`. [LC 50](https://leetcode.com/problems/powx-n/)
+- **Fast Power** — compute `a^b mod n` for huge `b`. *Insight:* iterative bit loop: square base, multiply into result when current bit set, take mod each step. [LintCode 140](https://www.lintcode.com/problem/fast-power/)
+- **Super Pow** — `a^b mod 1337` where `b` is given as a digit array (huge). *Insight:* `a^(10x + d) = a^d × (a^x)^10`; recurse on `b[:-1]` and combine via fast power. [LC 372](https://leetcode.com/problems/super-pow/)
+- **Fibonacci Number** — nth Fibonacci. *Insight:* `[[F_n+1], [F_n]] = M^n × [[1], [0]]` where `M = [[1,1],[1,0]]`; matrix-power gives O(log n). [LC 509](https://leetcode.com/problems/fibonacci-number/)
+- **Count Different Palindromic Subsequences** — count distinct palindromic subsequences mod 1e9+7. *Insight:* DP with mod arithmetic; final answer requires modular operations throughout. [LC 730](https://leetcode.com/problems/count-different-palindromic-subsequences/)
+- **Knight Dialer** — count length-N phone-pad sequences a knight can dial. *Insight:* state is the digit; transition matrix is sparse (knight moves on dial pad); matrix-power for huge N. [LC 935](https://leetcode.com/problems/knight-dialer/)

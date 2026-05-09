@@ -96,9 +96,10 @@ def sort_colors(A):                     # 0s, 1s, 2s
 
 ## Practice
 
-- [Kth Largest Element in an Array](https://leetcode.com/problems/kth-largest-element-in-an-array/)
-- [Wiggle Sort II](https://leetcode.com/problems/wiggle-sort-ii/)
-- [Sort Colors](https://leetcode.com/problems/sort-colors/)
-- [Top K Frequent Elements](https://leetcode.com/problems/top-k-frequent-elements/)
-- [K Closest Points to Origin](https://leetcode.com/problems/k-closest-points-to-origin/)
-- [Partition Array](https://www.lintcode.com/problem/partition-array/)
+- **Kth Largest Element in an Array** — find the kth largest. *Insight:* QuickSelect partition until the pivot lands at index `n-k`; O(n) average. [LC 215](https://leetcode.com/problems/kth-largest-element-in-an-array/)
+- **Wiggle Sort II** — reorder so `a < b > c < d > ...`. *Insight:* find median via QuickSelect; place numbers > median in odd indices, < median in even indices (interleave from middle to avoid clustering equal values). [LC 324](https://leetcode.com/problems/wiggle-sort-ii/)
+- **Sort Colors (Dutch National Flag)** — sort array of 0s, 1s, 2s in one pass. *Insight:* three-way partition with three pointers `(lo, mid, hi)`; swap based on `A[mid]`; only advance mid when not swapping with hi. [LC 75](https://leetcode.com/problems/sort-colors/)
+- **Top K Frequent Elements** — k most frequent. *Insight:* count frequencies, then QuickSelect on `(value, count)` pairs by count to land top-k in front of pivot. [LC 347](https://leetcode.com/problems/top-k-frequent-elements/)
+- **K Closest Points to Origin** — k closest points to (0, 0). *Insight:* QuickSelect partition by `dist²` until kth element settles; left of pivot is the answer. [LC 973](https://leetcode.com/problems/k-closest-points-to-origin/)
+- **Partition Array (around k)** — rearrange so all `< k` come before all `≥ k`. *Insight:* two-pointer Hoare-style partition with pivot value `k`. [LintCode 31](https://www.lintcode.com/problem/partition-array/)
+- **Median of Unsorted Array** — find median in O(n). *Insight:* QuickSelect for index `n//2` (and `n//2 - 1` if even). [LC 4 variant](https://leetcode.com/problems/median-of-two-sorted-arrays/)

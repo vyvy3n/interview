@@ -87,8 +87,9 @@ Conceptually: keep going right; whenever you turn left, remember that node.
 
 ## Practice
 
-- [Binary Search Tree Iterator](https://leetcode.com/problems/binary-search-tree-iterator/)
-- [Inorder Successor in BST](https://leetcode.com/problems/inorder-successor-in-bst/)
-- [Closest BST Value II](https://leetcode.com/problems/closest-binary-search-tree-value-ii/)
-- [Kth Smallest Element in a BST](https://leetcode.com/problems/kth-smallest-element-in-a-bst/)
-- [Validate BST](https://leetcode.com/problems/validate-binary-search-tree/) (in-order = strictly increasing)
+- **Binary Search Tree Iterator** — `next()` and `hasNext()` over BST in sorted order. *Insight:* stack holding the "left spine"; on `next`, pop, push right child's left spine. O(h) memory, amortized O(1) per `next`. [LC 173](https://leetcode.com/problems/binary-search-tree-iterator/)
+- **Inorder Successor in BST** — node with smallest value > p. *Insight:* iterate down: when going left, remember candidate; final candidate is the successor. [LC 285](https://leetcode.com/problems/inorder-successor-in-bst/)
+- **Closest BST Value II** — k values closest to a target. *Insight:* two stacks acting as forward and reverse iterators around target; pop the closer side k times. [LC 272](https://leetcode.com/problems/closest-binary-search-tree-value-ii/)
+- **Kth Smallest Element in a BST** — kth smallest value. *Insight:* iterative in-order using the stack template; stop after k pops. [LC 230](https://leetcode.com/problems/kth-smallest-element-in-a-bst/)
+- **Validate BST** — is the tree a valid BST? *Insight:* in-order traversal must produce strictly increasing values; one failure = not a BST. [LC 98](https://leetcode.com/problems/validate-binary-search-tree/)
+- **Recover BST** — exactly two nodes are swapped — restore them. *Insight:* in-order to find the two violators (`prev > current`); the *first* violation's `prev` and the *last* violation's `current` are the swapped pair. [LC 99](https://leetcode.com/problems/recover-binary-search-tree/)

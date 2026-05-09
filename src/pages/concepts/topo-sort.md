@@ -76,8 +76,9 @@ def topo_dfs(n, g):
 
 ## Practice
 
-- [Course Schedule](https://leetcode.com/problems/course-schedule/) · [Course Schedule II](https://leetcode.com/problems/course-schedule-ii/)
-- [Alien Dictionary](https://leetcode.com/problems/alien-dictionary/)
-- [Sequence Reconstruction](https://leetcode.com/problems/sequence-reconstruction/) (uniqueness)
-- [Minimum Height Trees](https://leetcode.com/problems/minimum-height-trees/) (peel leaves = topo on undirected)
-- [Parallel Courses](https://leetcode.com/problems/parallel-courses/)
+- **Course Schedule** — given prerequisites, can you finish all courses? *Insight:* topo sort on prereq graph; if it returns < n nodes, there's a cycle ⇒ impossible. [LC 207](https://leetcode.com/problems/course-schedule/)
+- **Course Schedule II** — return the order of courses to take. *Insight:* same Kahn's algorithm, return the order list (or `[]` if cycle). [LC 210](https://leetcode.com/problems/course-schedule-ii/)
+- **Alien Dictionary** — infer the letter ordering from a list of words sorted in alien lex order. *Insight:* compare adjacent word pairs; the first differing character pair gives an edge `a → b`. Topo sort the resulting graph. [LC 269](https://leetcode.com/problems/alien-dictionary/)
+- **Sequence Reconstruction** — does a unique super-sequence exist that contains every given sub-sequence? *Insight:* topo sort + uniqueness check — at every step, the queue must have exactly one node; otherwise multiple valid orderings exist. [LC 444](https://leetcode.com/problems/sequence-reconstruction/)
+- **Minimum Height Trees** — for an undirected tree, find roots that minimize tree height. *Insight:* "peel" leaves layer by layer (BFS on degree-1 nodes); the last 1-2 surviving nodes are the centroids. [LC 310](https://leetcode.com/problems/minimum-height-trees/)
+- **Parallel Courses** — minimum semesters to take all courses, taking any non-blocked subset per semester. *Insight:* Kahn's BFS where each "round" = one semester; count rounds until queue empty. [LC 1136](https://leetcode.com/problems/parallel-courses/)

@@ -83,9 +83,10 @@ for u, v in edges:
 
 ## Practice
 
-- [Number of Connected Components](https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/)
-- [Friend Circles / Number of Provinces](https://leetcode.com/problems/number-of-provinces/)
-- [Redundant Connection](https://leetcode.com/problems/redundant-connection/)
-- [Accounts Merge](https://leetcode.com/problems/accounts-merge/)
-- [Number of Islands II](https://leetcode.com/problems/number-of-islands-ii/)
-- [Most Stones Removed with Same Row or Column](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/)
+- **Number of Connected Components** — given `n` nodes and edges, how many components? *Insight:* DSU with `count = n` initial; decrement count on every successful union. [LC 323](https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/)
+- **Number of Provinces (Friend Circles)** — `M[i][j] = 1` if `i, j` friends; count friend groups. *Insight:* same as connected components; iterate the upper triangle and union each `1`. [LC 547](https://leetcode.com/problems/number-of-provinces/)
+- **Redundant Connection** — find the extra edge that creates a cycle in a tree. *Insight:* iterate edges; the first one whose endpoints are already in the same set is the redundant one. [LC 684](https://leetcode.com/problems/redundant-connection/)
+- **Accounts Merge** — merge accounts that share any email. *Insight:* union accounts by shared email — use `email → account_id` first-seen map; union the two account ids; then group by root. [LC 721](https://leetcode.com/problems/accounts-merge/)
+- **Number of Islands II** — for each addLand operation, return current island count. *Insight:* online union-find — when flipping a cell, init its component (count++), then union with land neighbors (count-- per successful union). [LC 305](https://leetcode.com/problems/number-of-islands-ii/)
+- **Most Stones Removed with Same Row or Column** — max stones removable (each removal needs a stone in same row/col). *Insight:* union stones sharing a row OR column (use `row_id` and `~col_id` as separate keys); answer = `n - num_components`. [LC 947](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/)
+- **Graph Valid Tree** — is the graph a tree (connected + no cycle)? *Insight:* must have exactly `n-1` edges AND every union must succeed (else cycle). [LC 261](https://leetcode.com/problems/graph-valid-tree/)

@@ -92,9 +92,10 @@ Max-heap of lower half, min-heap of upper half; rebalance to keep sizes within 1
 
 ## Practice
 
-- [Top K Frequent Elements](https://leetcode.com/problems/top-k-frequent-elements/)
-- [Kth Largest Element in an Array](https://leetcode.com/problems/kth-largest-element-in-an-array/)
-- [Merge K Sorted Lists](https://leetcode.com/problems/merge-k-sorted-lists/)
-- [Find Median from Data Stream](https://leetcode.com/problems/find-median-from-data-stream/)
-- [Meeting Rooms II](https://leetcode.com/problems/meeting-rooms-ii/)
-- [Kth Smallest Element in a Sorted Matrix](https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/)
+- **Top K Frequent Elements** — k most frequent values in `nums`. *Insight:* Counter → min-heap of size k of `(count, value)`; or bucket sort by frequency for O(n). [LC 347](https://leetcode.com/problems/top-k-frequent-elements/)
+- **Kth Largest Element in an Array** — kth largest. *Insight:* min-heap of size k; final heap top is the answer. (QuickSelect is O(n) avg if asked.) [LC 215](https://leetcode.com/problems/kth-largest-element-in-an-array/)
+- **Merge K Sorted Lists** — merge `k` sorted linked lists into one. *Insight:* push the head of each list into a min-heap of `(val, list_idx, node)`; pop, advance, repeat. [LC 23](https://leetcode.com/problems/merge-k-sorted-lists/)
+- **Find Median from Data Stream** — `addNum` + `findMedian` over a growing stream. *Insight:* two heaps — max-heap of lower half, min-heap of upper half; rebalance so sizes differ by at most 1. [LC 295](https://leetcode.com/problems/find-median-from-data-stream/)
+- **Meeting Rooms II** — minimum rooms needed for given meeting intervals. *Insight:* sort by start; min-heap of end times; if earliest end ≤ current start, reuse that room (pop). Heap size = answer. [LC 253](https://leetcode.com/problems/meeting-rooms-ii/)
+- **Kth Smallest Element in a Sorted Matrix** — both rows and columns sorted ascending. *Insight:* push first row into min-heap with `(val, row, col)`; pop k times, push the cell below each pop. [LC 378](https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/)
+- **K Closest Points to Origin** — k nearest points to (0, 0). *Insight:* max-heap of size k by `-distance²`; or QuickSelect partition by distance. [LC 973](https://leetcode.com/problems/k-closest-points-to-origin/)

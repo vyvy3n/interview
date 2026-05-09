@@ -113,9 +113,9 @@ def find_words(board, words):
 
 ## Practice
 
-- [Implement Trie (Prefix Tree)](https://leetcode.com/problems/implement-trie-prefix-tree/)
-- [Add and Search Word — Data Structure Design](https://leetcode.com/problems/design-add-and-search-words-data-structure/)
-- [Word Search II](https://leetcode.com/problems/word-search-ii/)
-- [Replace Words](https://leetcode.com/problems/replace-words/)
-- [Word Squares](https://www.lintcode.com/problem/word-squares/)
-- [Maximum XOR of Two Numbers in an Array](https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/) (binary trie)
+- **Implement Trie (Prefix Tree)** — `insert`, `search`, `startsWith`. *Insight:* mark end-of-word with a sentinel (`is_word: bool` or `"#"` key). [LC 208](https://leetcode.com/problems/implement-trie-prefix-tree/)
+- **Add and Search Word (with `.` wildcard)** — `search` may contain `.` matching any char. *Insight:* DFS at each `.` over all current children; otherwise normal trie walk. [LC 211](https://leetcode.com/problems/design-add-and-search-words-data-structure/)
+- **Word Search II** — find all dictionary words present in a grid (4-dir adjacency). *Insight:* build trie of dictionary; DFS each grid cell, only following children that exist in trie. Mark words found and prune leaves. [LC 212](https://leetcode.com/problems/word-search-ii/)
+- **Replace Words** — replace each word in a sentence by its shortest dictionary root prefix. *Insight:* insert all roots; for each word, walk the trie and stop at the first end-of-word. [LC 648](https://leetcode.com/problems/replace-words/)
+- **Word Squares** — build NxN grids where row[i] == col[i]. *Insight:* DFS row-by-row; the next row must start with the column-prefix above; trie indexed by prefix yields candidates fast. [LintCode 634](https://www.lintcode.com/problem/word-squares/)
+- **Maximum XOR of Two Numbers in an Array** — max `a ^ b` over pairs. *Insight:* binary trie of 32-bit ints; greedily descend toward the opposite bit at each level to maximize XOR. [LC 421](https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/)

@@ -88,9 +88,10 @@ def trap(h):
 
 ## Practice
 
-- [Next Greater Element I/II](https://leetcode.com/problems/next-greater-element-ii/)
-- [Daily Temperatures](https://leetcode.com/problems/daily-temperatures/)
-- [Largest Rectangle in Histogram](https://leetcode.com/problems/largest-rectangle-in-histogram/) · [Maximal Rectangle](https://leetcode.com/problems/maximal-rectangle/)
-- [Trapping Rain Water](https://leetcode.com/problems/trapping-rain-water/)
-- [Sum of Subarray Minimums](https://leetcode.com/problems/sum-of-subarray-minimums/)
-- [Remove K Digits](https://leetcode.com/problems/remove-k-digits/) (greedy + monotonic stack)
+- **Next Greater Element II** — circular array; next-greater for each index. *Insight:* sweep `2n` indices mod `n`; decreasing-value stack of indices, pop when current beats them. [LC 503](https://leetcode.com/problems/next-greater-element-ii/)
+- **Daily Temperatures** — for each day, days until a warmer day. *Insight:* decreasing-temperature stack of indices; on a warmer day, pop and record `i - popped`. [LC 739](https://leetcode.com/problems/daily-temperatures/)
+- **Largest Rectangle in Histogram** — max-area axis-aligned rectangle in histogram. *Insight:* increasing-height stack; on smaller bar, pop and compute rect with `width = i - new_top - 1`. Sentinel `0` at end flushes stack. [LC 84](https://leetcode.com/problems/largest-rectangle-in-histogram/)
+- **Maximal Rectangle** — largest rectangle of 1s in binary matrix. *Insight:* row-by-row, maintain heights array; apply largest-rectangle-in-histogram per row. [LC 85](https://leetcode.com/problems/maximal-rectangle/)
+- **Trapping Rain Water** — total water trapped between bars. *Insight:* stack of indices in decreasing height; on taller bar, pop "valley" and add `width × min(left, right) - popped` to total. [LC 42](https://leetcode.com/problems/trapping-rain-water/)
+- **Sum of Subarray Minimums** — sum of min over all subarrays. *Insight:* for each element, count subarrays where it's the min — bounded by previous-smaller (left) and next-smaller-or-equal (right). [LC 907](https://leetcode.com/problems/sum-of-subarray-minimums/)
+- **Remove K Digits** — remove K digits from numeric string to make smallest number. *Insight:* increasing-digit stack; pop when current < top and budget remains. [LC 402](https://leetcode.com/problems/remove-k-digits/)

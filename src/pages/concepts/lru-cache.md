@@ -113,7 +113,9 @@ In an interview, write the explicit doubly-linked version unless asked otherwise
 
 ## Practice
 
-- [LRU Cache](https://leetcode.com/problems/lru-cache/)
-- [LFU Cache](https://leetcode.com/problems/lfu-cache/)
-- [Design In-Memory File System](https://leetcode.com/problems/design-in-memory-file-system/)
-- [All O`one Data Structure](https://leetcode.com/problems/all-oone-data-structure/)
+- **LRU Cache** — `get` and `put` in O(1). *Insight:* hash map (key → node) + doubly linked list with sentinels; touch moves node to tail; evict from head on overflow. [LC 146](https://leetcode.com/problems/lru-cache/)
+- **LFU Cache** — evict least *frequently* used (ties broken by LRU). *Insight:* dict `count → OrderedDict of nodes`; track `min_count`; on access increment count, move node to higher bucket. [LC 460](https://leetcode.com/problems/lfu-cache/)
+- **Design In-Memory File System** — `mkdir`, `addContentToFile`, `readContentFromFile`, `ls`. *Insight:* Trie of path components — each node holds children dict + (optional) file content. [LC 588](https://leetcode.com/problems/design-in-memory-file-system/)
+- **All O`one Data Structure** — `inc`, `dec`, `getMaxKey`, `getMinKey` all in O(1). *Insight:* doubly linked list of *count buckets* + hash `key → bucket node`; inc moves key to next bucket (creating it if needed). [LC 432](https://leetcode.com/problems/all-oone-data-structure/)
+- **Design Hit Counter** — count hits in last 5 minutes. *Insight:* circular buffer of `(timestamp, count)` per second; on `getHits` filter by timestamp window. [LC 362](https://leetcode.com/problems/design-hit-counter/)
+- **Insert Delete GetRandom O(1)** — set with O(1) random pick. *Insight:* dict `value → index in array` + array of values; on delete, swap-with-last then pop both. [LC 380](https://leetcode.com/problems/insert-delete-getrandom-o1/)
