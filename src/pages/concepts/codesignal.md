@@ -7,6 +7,22 @@ title: CodeSignal Workflow & Pytest
 
 > The Industry Coding Framework (ICF) format used by Anthropic, Meta, Coinbase and others. 4 progressive levels, ~90 minutes, pytest-style tests.
 
+## ⚡ Copy-paste during the interview
+
+**Run all tests in a level:**
+
+```bash
+pytest test_level1.py -vv
+```
+
+**Run one specific test (with full failure detail):**
+
+```bash
+pytest test_level3.py::test_schedule_payment_basic -vv --tb=long
+```
+
+Read on for the full flag set, debugging tricks, and ICF strategy.
+
 ## The format at a glance
 
 | | What you get |
