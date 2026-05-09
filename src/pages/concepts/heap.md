@@ -48,6 +48,9 @@ def top_k(nums, k):
 
 ## Heapify in O(n) — sift-down from the bottom
 
+![](/notes/leetcode/media/image9.png)
+
+
 ```python
 def shift_down(A, k):
     while 2 * k + 1 < len(A):

@@ -71,6 +71,9 @@ class Trie:
 
 ## Word search in grid (Trie-pruned DFS)
 
+![](/notes/leetcode/media/image11.png)
+
+
 Build a trie of all words; DFS the grid only following children that exist in the current trie node. Mark word in trie when found, then *delete* the leaf to avoid duplicates.
 
 ```python

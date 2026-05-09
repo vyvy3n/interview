@@ -27,6 +27,12 @@ def range_sum(pre, l, r):  # inclusive [l, r]
     return pre[r + 1] - pre[l]
 ```
 
+## Continuous Subarray Sum (mod K)
+
+![](/notes/leetcode/media/image17.png)
+
+If `prefix[i] mod k == prefix[j] mod k` for `i < j`, then the slice `nums[i+1..j]` sums to a multiple of `k`. Hash `mod → first index seen`.
+
 ## Subarray sum equals K (with hash)
 
 ```python

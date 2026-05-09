@@ -71,6 +71,24 @@ def trap(h):
     return water
 ```
 
+## Min Stack — store `(value, running_min)` pairs
+
+![](/notes/leetcode/media/image5.png)
+
+```python
+class MinStack:
+    def __init__(self):
+        self.stack = []                     # list of (value, current_min)
+    def push(self, x):
+        m = x if not self.stack else min(x, self.stack[-1][1])
+        self.stack.append((x, m))
+    def pop(self):  self.stack.pop()
+    def top(self):  return self.stack[-1][0]
+    def getMin(self): return self.stack[-1][1]
+```
+
+Pairs trick: bundle the running aggregate with each element so pop never has to recompute.
+
 ## When stack direction matters
 
 | Goal | Maintain on stack |

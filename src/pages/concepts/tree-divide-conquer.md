@@ -13,6 +13,14 @@ title: Tree Divide & Conquer
 - The answer at a node depends on answers from its children
 - You need *two* things from each child: a "downward chain" answer and a "passing-through this node" answer
 
+## The recursion picture
+
+![](/notes/leetcode/media/image18.png)
+
+![](/notes/leetcode/media/image19.png)
+
+The recursion descends to leaves, then *combines* answers on the way back up. The combine step at each node uses only what its children returned — this is what makes the pattern composable.
+
 ## Template 1: one return value
 
 ```python

@@ -66,6 +66,12 @@ def find(x):
     return parent[x]
 ```
 
+## Path compression — picture
+
+![](/notes/leetcode/media/image10.png)
+
+Without compression, repeatedly walking up to the root costs O(n) per `find` in the worst case (a linear chain). Compression flattens the chain on each `find`, making subsequent calls almost O(1) amortized.
+
 ## Pattern: "is the new edge redundant?"
 
 ```python

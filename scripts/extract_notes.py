@@ -24,7 +24,7 @@ from docx.oxml.ns import qn
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = ROOT / "leetcode-notes-tw"
-OUT_PAGES = ROOT / "src" / "pages" / "notes"
+OUT_PAGES = ROOT / "_extracted"
 OUT_MEDIA = ROOT / "public" / "notes"
 
 DOCS = {
