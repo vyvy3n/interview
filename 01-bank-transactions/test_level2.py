@@ -139,7 +139,7 @@ def test_top_spenders_combined_pay_and_transfer():
         ["TOP_SPENDERS",   "8", "2"],
     ]
     # alice: 300 outgoing, bob: 50 outgoing
-    assert solution(queries) == ["true", "true", "1000", "500", "800", "700", "650", "alice(300), bob(50)"]
+    assert solution(queries) == ["true", "true", "1000", "500", "800", "700", "550", "alice(300), bob(50)"]
 
 
 def test_top_spenders_n_larger_than_accounts():

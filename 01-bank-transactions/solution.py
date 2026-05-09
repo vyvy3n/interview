@@ -17,9 +17,32 @@ Level 3: SCHEDULE_PAYMENT, CANCEL_PAYMENT       — see spec/level3.md
 Level 4: MERGE_ACCOUNTS                         — see spec/level4.md
 """
 
+class Account:
+    def __init__(self, account_id):
+        self.account_id = account_id
+        self.balance = 0
+        self.outgoing = 0
 
+    def deposit(self, amount):
+        self.balance += int(amount)
+
+    def pay(self, amount):
+        self.balance -= int(amount)
+        self.outgoing += int(amount)
+
+    def transfer(self, amount):
+        self.balance -= int(amount)
+        self.outgoing += int(amount)
+
+    def get_balance(self):
+        return str(self.balance)
+
+    def get_outgoing(self):
+        return str(self.outgoing)
+
+   
 def solution(queries):
-    accounts = {}   # account_id (str) -> balance (int)
+    accounts = {}  # account_id (str) -> Account(account_id)
     out = []
 
     for q in queries:
@@ -32,7 +55,8 @@ def solution(queries):
             if account_id in accounts:
                 out.append("false")
             else:
-                accounts[account_id] = 0
+                account_instance = Account(account_id)  # create a new account instance
+                accounts[account_id] = account_instance
                 out.append("true")
 
         elif op == "DEPOSIT":
@@ -42,8 +66,8 @@ def solution(queries):
             if account_id not in accounts:
                 out.append("")
             else:
-                accounts[account_id] += int(amount)
-                out.append(str(accounts[account_id]))
+                accounts[account_id].deposit(amount)
+                out.append(str(accounts[account_id].balance))
 
         elif op == "PAY":
             # q is ["PAY", timestamp, account_id, amount]
@@ -53,9 +77,9 @@ def solution(queries):
             if account_id not in accounts:
                 out.append("")
             else:
-                if accounts[account_id] >= int(amount):
-                    accounts[account_id] -= int(amount)
-                    out.append(str(accounts[account_id]))
+                if accounts[account_id].balance >= int(amount):
+                    accounts[account_id].pay(amount)
+                    out.append(str(accounts[account_id].balance))
                 else:
                     out.append("")
 
@@ -68,7 +92,19 @@ def solution(queries):
             #       Return new balance of from_id as string.
             #       Return "" if either account missing, from_id==to_id, or insufficient funds.
             #       Count amount toward from_id's outgoing total on success.
-            raise NotImplementedError("TRANSFER — see spec/level2.md")
+            # raise NotImplementedError("TRANSFER — see spec/level2.md")
+            if from_id not in accounts:
+                out.append("")
+            elif to_id not in accounts:
+                out.append("")
+            elif from_id == to_id:
+                out.append("")
+            elif accounts[from_id].balance < int(amount):
+                out.append("")
+            else:
+                accounts[from_id].transfer(amount) 
+                accounts[to_id].deposit(amount)
+                out.append(str(accounts[from_id].balance))
 
         elif op == "TOP_SPENDERS":
             # q is ["TOP_SPENDERS", timestamp, n]
@@ -76,8 +112,13 @@ def solution(queries):
             # TODO: Return top-n accounts by total outgoing (PAY + TRANSFER amounts sent).
             #       Format: "alice(500), bob(300), carol(200)"
             #       Sort: outgoing DESC, ties broken by account_id ASC (alphabetical).
-            #       If fewer than n accounts exist, return all of them.
-            raise NotImplementedError("TOP_SPENDERS — see spec/level2.md")
+            #       If fewer than n accounts e xist, return all of them.
+            if n == 0:
+                return ""
+            
+            sorted_accounts = sorted(accounts.values(), key=lambda x: (-x.outgoing, x.account_id))
+            top_n_accounts = sorted_accounts[:int(n)]
+            out.append(", ".join([f"{account.account_id}({account.outgoing})" for account in top_n_accounts]))
 
         # --- Level 3 ---
 
