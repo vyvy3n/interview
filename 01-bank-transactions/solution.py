@@ -29,20 +29,35 @@ def solution(queries):
             # q is ["CREATE_ACCOUNT", timestamp, account_id]
             _, timestamp, account_id = q
             # TODO: append "true" if newly created, "false" if already exists.
-            raise NotImplementedError("CREATE_ACCOUNT")
+            if account_id in accounts:
+                out.append("false")
+            else:
+                accounts[account_id] = 0
+                out.append("true")
 
         elif op == "DEPOSIT":
             # q is ["DEPOSIT", timestamp, account_id, amount]
             _, timestamp, account_id, amount = q
             # TODO: append new balance as a string, or "" if account missing.
-            raise NotImplementedError("DEPOSIT")
+            if account_id not in accounts:
+                out.append("")
+            else:
+                accounts[account_id] += int(amount)
+                out.append(str(accounts[account_id]))
 
         elif op == "PAY":
             # q is ["PAY", timestamp, account_id, amount]
             _, timestamp, account_id, amount = q
             # TODO: append new balance as string, or "" if missing/insufficient.
             #       Do NOT deduct on insufficient funds.
-            raise NotImplementedError("PAY")
+            if account_id not in accounts:
+                out.append("")
+            else:
+                if accounts[account_id] >= int(amount):
+                    accounts[account_id] -= int(amount)
+                    out.append(str(accounts[account_id]))
+                else:
+                    out.append("")
 
         # --- Level 2 ---
 
