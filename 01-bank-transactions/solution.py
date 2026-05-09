@@ -199,7 +199,22 @@ def solution(queries):
             #       reassign all pending (unfired, uncancelled) payments from id2 to id1.
             #       Delete id2 entirely. Return "true" on success.
             #       Return "" if either account missing or id1 == id2.
-            raise NotImplementedError("MERGE_ACCOUNTS — see spec/level4.md")
+
+            if id1 not in accounts:
+                out.append("")
+            elif id2 not in accounts:
+                out.append("")
+            elif id1 == id2:
+                out.append("")
+            else:
+                accounts[id1].balance += accounts[id2].balance
+                accounts[id1].outgoing += accounts[id2].outgoing
+                for pid, payment in pending_payments.items():
+                    if payment.account_id == id2:
+                        payment.account_id = id1
+                        # pending_payments[pid] = payment
+                accounts.pop(id2)
+                out.append("true")
 
         else:
             raise ValueError(f"Unknown op: {op}")
