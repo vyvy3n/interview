@@ -62,7 +62,11 @@ def solution(queries):
             # TODO: Return the value at (key, field), or "" if missing or expired.
             # See spec/level1.md (expiry logic added in level3.md)
             if key in db and field in db[key]:
-                out.append(db[key][field][0])
+                value, expiry_ts = db[key][field]
+                if expiry_ts is not None and expiry_ts <= int(ts):
+                    out.append("")
+                else:
+                    out.append(db[key][field][0])
             else:
                 out.append("")
         
@@ -73,8 +77,13 @@ def solution(queries):
             # "false" otherwise.
             # See spec/level1.md (expiry logic added in level3.md)
             if key in db and field in db[key]:
-                del db[key][field]
-                out.append("true")
+                value, expiry_ts = db[key][field]
+                if expiry_ts is not None and expiry_ts <= int(ts):  # already expired
+                    del db[key][field]
+                    out.append("false")
+                else:
+                    del db[key][field]
+                    out.append("true")
             else:
                 out.append("false")
 
@@ -124,7 +133,11 @@ def solution(queries):
             # Overwrites any existing value and/or TTL at (key, field).
             # Returns "".
             # See spec/level3.md
-            raise NotImplementedError("SET_WITH_TTL — see spec/level3.md")
+            if key not in db:
+                db[key] = {}
+
+            db[key][field] = (value, int(ts) + int(ttl))
+            out.append("")
 
         elif op == "UPDATE_TTL":
             # q is ["UPDATE_TTL", ts, key, field, ttl]
@@ -134,7 +147,21 @@ def solution(queries):
             # Return "false" if missing or already expired.
             # Does NOT change the stored value.
             # See spec/level3.md
-            raise NotImplementedError("UPDATE_TTL — see spec/level3.md")
+            if key not in db:  # missing
+                db[key] = {}
+                out.append("false")
+
+            elif field not in db[key]:
+                out.append("false")
+
+            else:  # exist, to update ttl
+                value, expiry_ts = db[key][field]
+                if expiry_ts is not None and expiry_ts <= int(ts):
+                    out.append("false")  # already expired
+                else:
+                    db[key][field] = (value, int(ts) + int(ttl))
+                    out.append("true")
+        
 
         # ------------------------------------------------------------------ #
         # LEVEL 4 — Backup / Restore                                          #
