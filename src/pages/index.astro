@@ -1,19 +1,46 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-// Categorized concepts. Add new entries here as you write more notes.
+// Categorized concepts — tap to drill in.
 const sections = [
   {
-    title: 'Arrays & Strings',
+    title: 'Patterns',
     items: [
       { href: '/concepts/two-pointers', title: 'Two Pointers', hint: 'opposite ends, fast/slow, partitioning' },
-      { href: '/concepts/sliding-window', title: 'Sliding Window', hint: 'fixed/variable size subarray problems' },
+      { href: '/concepts/sliding-window', title: 'Sliding Window', hint: 'fixed/variable subarray under invariant' },
+      { href: '/concepts/binary-search', title: 'Binary Search', hint: 'sorted array or monotonic predicate' },
+      { href: '/concepts/prefix-sum', title: 'Prefix Sum', hint: 'range sums, subarray-sum-equals-K' },
+      { href: '/concepts/dfs-backtracking', title: 'DFS & Backtracking', hint: 'enumerate, prune, undo' },
+      { href: '/concepts/bfs', title: 'BFS', hint: 'layered, implicit graph, bidirectional' },
+      { href: '/concepts/tree-divide-conquer', title: 'Tree Divide & Conquer', hint: 'return-from-children pattern' },
+      { href: '/concepts/topo-sort', title: 'Topological Sort', hint: 'DAG order, indegree BFS or DFS' },
+      { href: '/concepts/union-find', title: 'Union Find', hint: 'connected components, path compression' },
+      { href: '/concepts/heap', title: 'Heap & Top-K', hint: 'heapify O(n), kth element, streaming' },
+      { href: '/concepts/greedy', title: 'Greedy', hint: 'local choice → global optimum, intervals' },
     ],
   },
   {
-    title: 'Search',
+    title: 'Data Structures',
     items: [
-      { href: '/concepts/binary-search', title: 'Binary Search', hint: 'sorted arrays, search space reduction' },
+      { href: '/concepts/hash-table', title: 'Hash Table Tricks', hint: 'count, prefix-hash, two-sum family' },
+      { href: '/concepts/trie', title: 'Trie / Prefix Tree', hint: 'word search, prefix queries' },
+      { href: '/concepts/monotonic-stack', title: 'Monotonic Stack', hint: 'next greater/smaller element' },
+      { href: '/concepts/linked-list', title: 'Linked List', hint: 'dummy head, doubly linked, reversal' },
+    ],
+  },
+  {
+    title: 'Algorithms / Tricks',
+    items: [
+      { href: '/concepts/quickselect', title: 'QuickSelect / Partition', hint: 'kth largest in O(n) avg' },
+      { href: '/concepts/big-int-strings', title: 'Big-Int String Math', hint: 'add/subtract/multiply long numbers' },
+      { href: '/concepts/fast-power', title: 'Fast Power', hint: 'a^n mod m in O(log n)' },
+    ],
+  },
+  {
+    title: 'Design',
+    items: [
+      { href: '/concepts/lru-cache', title: 'LRU Cache', hint: 'hash + doubly linked list' },
+      { href: '/concepts/bst-iterator', title: 'BST Iterator', hint: 'in-order traversal, controlled stack' },
     ],
   },
 ];

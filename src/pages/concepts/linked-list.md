@@ -1,0 +1,124 @@
+---
+layout: ../../layouts/Layout.astro
+title: Linked List
+---
+
+# Linked List
+
+> Pointer manipulation. Cheap insert/delete given a node, no random access.
+
+## When to use
+
+- The problem hands you a list head — usually means do it in O(1) extra space.
+- Preserve order while removing duplicates, partitioning, or merging.
+- LRU / LFU caches need O(1) node-from-anywhere removal → **doubly** linked.
+
+## Three idioms to memorize
+
+**1. Dummy head** — never special-case the first node.
+**2. Two pointers (fast / slow)** — cycle detection, middle, kth-from-end.
+**3. Reversal** — three-pointer rewrite.
+
+## Reverse a list
+
+```python
+def reverse(head):
+    prev = None
+    cur = head
+    while cur:
+        nxt = cur.next
+        cur.next = prev
+        prev = cur
+        cur = nxt
+    return prev
+```
+
+## Cycle detection (Floyd)
+
+```python
+def has_cycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast: return True
+    return False
+
+def cycle_start(head):              # also returns where the cycle begins
+    slow = fast = head
+    while fast and fast.next:
+        slow, fast = slow.next, fast.next.next
+        if slow is fast:
+            slow = head
+            while slow is not fast:
+                slow, fast = slow.next, fast.next
+            return slow
+    return None
+```
+
+## Find middle (always rounds up to upper-middle when even)
+
+```python
+def middle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow, fast = slow.next, fast.next.next
+    return slow
+```
+
+## Merge two sorted lists
+
+```python
+def merge(a, b):
+    dummy = tail = ListNode()
+    while a and b:
+        if a.val <= b.val:
+            tail.next, a = a, a.next
+        else:
+            tail.next, b = b, b.next
+        tail = tail.next
+    tail.next = a or b
+    return dummy.next
+```
+
+## Doubly linked list (for LRU and friends)
+
+```python
+class Node:
+    def __init__(self, key=None, val=None):
+        self.key, self.val = key, val
+        self.prev = self.next = None
+
+# always use two dummy sentinels
+head, tail = Node(), Node()
+head.next, tail.prev = tail, head
+
+def remove(node):
+    node.prev.next = node.next
+    node.next.prev = node.prev
+
+def add_to_tail(node):
+    node.prev = tail.prev
+    node.next = tail
+    tail.prev.next = node
+    tail.prev = node
+```
+
+Sentinels mean you never check for None at the boundaries.
+
+## Gotchas
+
+- **Always save `cur.next` before reassigning** — losing the rest of the list is the #1 bug.
+- For reversal, return `prev`, not `cur` (cur ends as None).
+- Fast/slow: stop on `while fast and fast.next` to avoid NPE on even length.
+- When deleting a node by value, you need the *previous* node — use a dummy head.
+
+## Practice
+
+- [Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/) · [Reverse Nodes in k-Group](https://leetcode.com/problems/reverse-nodes-in-k-group/)
+- [Linked List Cycle](https://leetcode.com/problems/linked-list-cycle/) · [Linked List Cycle II](https://leetcode.com/problems/linked-list-cycle-ii/)
+- [Merge Two Sorted Lists](https://leetcode.com/problems/merge-two-sorted-lists/) · [Merge K Sorted Lists](https://leetcode.com/problems/merge-k-sorted-lists/)
+- [Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list/)
+- [Copy List with Random Pointer](https://leetcode.com/problems/copy-list-with-random-pointer/)
+- [Reorder List](https://leetcode.com/problems/reorder-list/)
+- [LRU Cache](https://leetcode.com/problems/lru-cache/) — see [LRU page](/concepts/lru-cache)

@@ -5,3 +5,7 @@ dist
 .DS_Store
 .env
 .env.local
+
+# raw source notes (large .docx + extracted markdown) — content gets curated into src/
+leetcode-notes-tw
+_extracted
