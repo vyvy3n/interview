@@ -49,22 +49,34 @@ def solution(queries):
             # TODO: Store value at (key, field) with no TTL. Overwrite if exists.
             # Returns "".
             # See spec/level1.md
-            raise NotImplementedError("SET — see spec/level1.md")
+            # always overwrite
+            if key not in db:
+                db[key] = {}
+
+            db[key][field] = (value, None)
+            out.append("")
 
         elif op == "GET":
             # q is ["GET", ts, key, field]
             _, ts, key, field = q
             # TODO: Return the value at (key, field), or "" if missing or expired.
             # See spec/level1.md (expiry logic added in level3.md)
-            raise NotImplementedError("GET — see spec/level1.md")
-
+            if key in db and field in db[key]:
+                out.append(db[key][field][0])
+            else:
+                out.append("")
+        
         elif op == "DELETE":
             # q is ["DELETE", ts, key, field]
             _, ts, key, field = q
             # TODO: Remove (key, field). Return "true" if it existed (and not expired),
             # "false" otherwise.
             # See spec/level1.md (expiry logic added in level3.md)
-            raise NotImplementedError("DELETE — see spec/level1.md")
+            if key in db and field in db[key]:
+                del db[key][field]
+                out.append("true")
+            else:
+                out.append("false")
 
         # ------------------------------------------------------------------ #
         # LEVEL 2 — Scan operations                                           #
