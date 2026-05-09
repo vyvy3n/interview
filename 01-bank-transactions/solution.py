@@ -17,6 +17,7 @@ Level 3: SCHEDULE_PAYMENT, CANCEL_PAYMENT       — see spec/level3.md
 Level 4: MERGE_ACCOUNTS                         — see spec/level4.md
 """
 
+
 class Account:
     def __init__(self, account_id):
         self.account_id = account_id
@@ -40,13 +41,43 @@ class Account:
     def get_outgoing(self):
         return str(self.outgoing)
 
-   
+
 def solution(queries):
     accounts = {}  # account_id (str) -> Account(account_id)
     out = []
+    payment_count = 0
+    pending_payments = {}  # payment_id (str) -> Payment(payment_id)
+
+    class Payment:
+        def __init__(self, timestamp, account_id, amount, delay, payment_count):
+            self.execute_time = int(timestamp) + int(delay)
+            self.account_id = account_id
+            self.amount = int(amount)
+            self.fired = False
+            self.payment_count = payment_count
+
+        def fire(self):
+            # fire only if account has enough balance
+            if accounts[self.account_id].balance >= self.amount:
+                accounts[self.account_id].balance -= self.amount
+                accounts[self.account_id].outgoing += self.amount
+            # skip if account has insufficient balance; but still mark as fired
+            self.fired = True
+    
+    def fire_pending_payments(ts):
+        to_be_fired_pid = []
+        for pid, payment in pending_payments.items():
+            if payment.execute_time <= int(ts):
+                payment.fire()
+                to_be_fired_pid.append(pid)
+        
+        for pid in to_be_fired_pid:
+            pending_payments.pop(pid)
 
     for q in queries:
         op = q[0]
+        ts = q[1]
+        fire_pending_payments(ts)
 
         if op == "CREATE_ACCOUNT":
             # q is ["CREATE_ACCOUNT", timestamp, account_id]
@@ -129,7 +160,15 @@ def solution(queries):
             #       Register a future payment firing at int(timestamp) + int(delay).
             #       Return global sequential payment_id (e.g. "payment1") if account exists.
             #       Return "" if account does not exist (do NOT increment counter).
-            raise NotImplementedError("SCHEDULE_PAYMENT — see spec/level3.md")
+
+            # handle scheduling of payment
+            if account_id in accounts:
+                payment_count += 1
+                payment_id = f"payment{payment_count}"
+                pending_payments[payment_id] = Payment(timestamp, account_id, amount, delay, payment_count)
+                out.append(payment_id)
+            else:
+                out.append("")
 
         elif op == "CANCEL_PAYMENT":
             # q is ["CANCEL_PAYMENT", timestamp, account_id, payment_id]
@@ -137,7 +176,18 @@ def solution(queries):
             # TODO: Before processing, fire any pending payments with execute_time <= int(timestamp).
             #       Return "true" if payment exists, belongs to account_id, and hasn't fired/been cancelled.
             #       Return "" otherwise (account missing, payment missing, wrong owner, already fired).
-            raise NotImplementedError("CANCEL_PAYMENT — see spec/level3.md")
+
+            if payment_id in pending_payments:
+                if pending_payments[payment_id].account_id == account_id:
+                    if pending_payments[payment_id].fired == True:
+                        out.append("")
+                    else:
+                        pending_payments.pop(payment_id)
+                        out.append("true")
+                else:
+                    out.append("")
+            else:
+                out.append("")
 
         # --- Level 4 ---
 

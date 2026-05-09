@@ -13,20 +13,12 @@ from solution import solution
 
 
 def test_schedule_payment_basic():
-    # Schedule and let it fire naturally; at ts=10 (delay=5 from ts=5), it fires
+    # Schedule fires at ts=10 (5+5). At ts=11, due payment runs before PAY 1 → 500-200-1=299.
     queries = [
         ["CREATE_ACCOUNT",   "1",  "alice"],
         ["DEPOSIT",          "2",  "alice", "500"],
-        ["SCHEDULE_PAYMENT", "5",  "alice", "200", "5"],   # fires at ts=10
-        ["DEPOSIT",          "11", "alice", "0"],           # ts=11 > 10, payment should have fired
-    ]
-    # DEPOSIT 0 is invalid per spec. Use a PAY instead to observe balance.
-    # Actually the spec says amount > 0. Observe balance via a PAY that returns new bal.
-    queries = [
-        ["CREATE_ACCOUNT",   "1",  "alice"],
-        ["DEPOSIT",          "2",  "alice", "500"],
-        ["SCHEDULE_PAYMENT", "5",  "alice", "200", "5"],   # fires at ts=10
-        ["PAY",              "11", "alice", "1"],           # fires payment first (ts=10<=11), then PAY 1; alice: 500-200-1=299
+        ["SCHEDULE_PAYMENT", "5",  "alice", "200", "5"],
+        ["PAY",              "11", "alice", "1"],
     ]
     assert solution(queries) == ["true", "500", "payment1", "299"]
 
