@@ -128,3 +128,36 @@ blockquote {
 }
 
 hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+
+/* images extracted from docx — responsive, never overflow */
+main img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 12px auto;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fff;
+}
+
+/* tables in extracted docs */
+main table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+  margin: 1em 0;
+  display: block;
+  overflow-x: auto;
+}
+
+main th, main td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+main th {
+  background: var(--code-bg);
+  font-weight: 600;
+}

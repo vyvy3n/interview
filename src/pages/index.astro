@@ -4,7 +4,23 @@ import Layout from '../layouts/Layout.astro';
 // Categorized concepts — tap to drill in.
 const sections = [
   {
+    title: 'Source Notes',
+    note: 'full content from your study docs (with diagrams)',
+    items: [
+      { href: '/notes/cheatsheet',     title: 'Cheatsheet',          hint: '核心模板: heapify, union find, trie, partition…' },
+      { href: '/notes/high-frequency', title: 'Leetcode 高频题',     hint: '面试高频题, BFS / DFS / D&C / 哈希' },
+      { href: '/notes/dp',             title: 'Dynamic Programming', hint: '最值 / 计数 / 存在型 DP, 滚动数组' },
+      { href: '/notes/leetcode',       title: 'Leetcode (主笔记)',   hint: '主线笔记 + 解法' },
+      { href: '/notes/segment-tree',   title: 'Segment Tree',        hint: '建树 / 查询 / 更新 / lazy' },
+      { href: '/notes/ood',            title: 'Object-Oriented Design', hint: 'SOLID, 5C, UML, 经典设计题' },
+      { href: '/notes/system-design',  title: 'System Design',       hint: 'scale, sharding, caching' },
+      { href: '/notes/ml',             title: 'ML Interview',        hint: '基础概念 + 常考题' },
+      { href: '/notes/interview-logs', title: '面试笔记 & Logs',     hint: '问题记录 / 复盘' },
+    ],
+  },
+  {
     title: 'Patterns',
+    note: 'pattern-first quick reference for problem recognition',
     items: [
       { href: '/concepts/two-pointers', title: 'Two Pointers', hint: 'opposite ends, fast/slow, partitioning' },
       { href: '/concepts/sliding-window', title: 'Sliding Window', hint: 'fixed/variable subarray under invariant' },
@@ -52,6 +68,7 @@ const sections = [
   {sections.map(section => (
     <div class="section">
       <h2>{section.title}</h2>
+      {section.note && <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">{section.note}</p>}
       <ul class="concepts">
         {section.items.map(item => (
           <li>

@@ -9,3 +9,8 @@ dist
 # raw source notes (large .docx + extracted markdown) — content gets curated into src/
 leetcode-notes-tw
 _extracted
+
+# python venv used by the docx extraction script
+.venv
+__pycache__
+*.pyc
