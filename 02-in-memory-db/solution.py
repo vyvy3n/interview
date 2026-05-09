@@ -89,14 +89,29 @@ def solution(queries):
             # alphabetically by field, formatted as "f1(v1), f2(v2), ...".
             # Return "" if key missing or no non-expired fields.
             # See spec/level2.md
-            raise NotImplementedError("SCAN — see spec/level2.md")
+            if key in db:
+                sorted_fields_values = sorted(db[key].items(), key=lambda x: x[0])
+                out.append(", ".join([f"{field}({value})"
+                    for field, (value, expiry_ts) in sorted_fields_values
+                    if expiry_ts is None or expiry_ts > int(ts)
+                ]))
+            else:
+                out.append("")
 
         elif op == "SCAN_BY_PREFIX":
             # q is ["SCAN_BY_PREFIX", ts, key, prefix]
             _, ts, key, prefix = q
             # TODO: Same as SCAN but only include fields starting with prefix.
             # See spec/level2.md
-            raise NotImplementedError("SCAN_BY_PREFIX — see spec/level2.md")
+            if key in db:
+                sorted_fields_values = sorted(db[key].items(), key=lambda x: x[0])
+                out.append(", ".join([f"{field}({value})"
+                    for field, (value, expiry_ts) in sorted_fields_values
+                    if field.startswith(prefix) and
+                    (expiry_ts is None or expiry_ts > int(ts))
+                ]))
+            else:
+                out.append("")
 
         # ------------------------------------------------------------------ #
         # LEVEL 3 — TTL / expiration                                          #
