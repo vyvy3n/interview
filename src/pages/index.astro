@@ -1,0 +1,40 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Categorized concepts. Add new entries here as you write more notes.
+const sections = [
+  {
+    title: 'Arrays & Strings',
+    items: [
+      { href: '/concepts/two-pointers', title: 'Two Pointers', hint: 'opposite ends, fast/slow, partitioning' },
+      { href: '/concepts/sliding-window', title: 'Sliding Window', hint: 'fixed/variable size subarray problems' },
+    ],
+  },
+  {
+    title: 'Search',
+    items: [
+      { href: '/concepts/binary-search', title: 'Binary Search', hint: 'sorted arrays, search space reduction' },
+    ],
+  },
+];
+---
+<Layout title="interview cheat sheet" showHome={false}>
+  <h1>cheat sheet</h1>
+  <p style="color: var(--muted); margin-top: -4px;">quick review for coding interviews — tap a topic.</p>
+
+  {sections.map(section => (
+    <div class="section">
+      <h2>{section.title}</h2>
+      <ul class="concepts">
+        {section.items.map(item => (
+          <li>
+            <a href={item.href}>
+              {item.title}
+              <small>{item.hint}</small>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</Layout>
