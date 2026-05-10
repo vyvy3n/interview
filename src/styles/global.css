@@ -22,6 +22,44 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+/* Floating "back to top" button — visible on every page, every scroll */
+.back-to-top {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  opacity: 0.8;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.back-to-top:hover,
+.back-to-top:active {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+@media (max-width: 640px) {
+  .back-to-top {
+    width: 40px;
+    height: 40px;
+    bottom: 14px;
+    right: 14px;
+    font-size: 20px;
+  }
 }
 
 body {

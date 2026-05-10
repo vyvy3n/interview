@@ -12,6 +12,7 @@ const { title = 'interview cheat sheet', showHome = true } = Astro.props;
     <title>{title}</title>
   </head>
   <body>
+    <a id="top" tabindex="-1"></a>
     {showHome && (
       <header class="site">
         <a href="/" class="home">← cheat sheet</a>
@@ -22,5 +23,6 @@ const { title = 'interview cheat sheet', showHome = true } = Astro.props;
     <main>
       <slot />
     </main>
+    <a href="#top" class="back-to-top" aria-label="Back to top" title="Back to top">↑</a>
   </body>
 </html>
