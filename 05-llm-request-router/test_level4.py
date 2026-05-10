@@ -290,23 +290,22 @@ def test_worked_example_from_spec():
 
 
 def test_fail_reroute_prefix_none_requests_use_fallback_only():
-    # Mix of plain and prefix requests on failed GPU; plain ones use fallback only (no cache update)
+    # Mix of plain and prefix requests; plain reroutes don't update prefix cache.
     queries = [
         ["REGISTER_GPU",              "1", "gpu-a", "2"],
         ["REGISTER_GPU",              "2", "gpu-b", "2"],
-        ["ROUTE_REQUEST",             "3", "req-plain", "10"],           # gpu-a (plain, no prefix)
-        ["ROUTE_REQUEST_WITH_PREFIX", "4", "req-pfx",   "pfx:X", "10"], # gpu-a has prefix
+        ["ROUTE_REQUEST",             "3", "req-plain", "10"],          # 0=0 → gpu-a (alpha)
+        ["ROUTE_REQUEST_WITH_PREFIX", "4", "req-pfx",   "pfx:X", "10"], # no cache hit → least-loaded → gpu-b
         ["FAIL_GPU",                  "5", "gpu-a"],
-        # gpu-a had [req-pfx, req-plain]. Sort alpha: [req-pfx, req-plain]
-        # req-pfx: prefix=pfx:X; gpu-b has no pfx:X → fallback → gpu-b; gpu-b cache gets pfx:X
-        # req-plain: prefix=None; fallback → gpu-b (still has cap); no cache update for plain
+        # gpu-a had only [req-plain]. Re-route req-plain (no prefix) → least-loaded → gpu-b.
+        # No cache update for plain re-route. gpu-b's cache still has pfx:X from step 4.
         ["GPU_LOAD",                  "6", "gpu-b"],
         ["GET_CACHED_PREFIXES",       "7", "gpu-b"],
     ]
     assert solution(queries) == [
         "true", "true",
-        "gpu-a", "gpu-a",
-        "2",
+        "gpu-a", "gpu-b",
+        "1",
         "2/2",
         "pfx:X",
     ]

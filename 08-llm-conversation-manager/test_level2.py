@@ -36,7 +36,8 @@ def test_top_k_by_message_count_desc():
         ["TOP_K_ACTIVE", "7", "3"],
     ]
     # conv_b:2, conv_a:1, conv_c:0
-    assert solution(queries) == ["true", "true", "true", "5", "10", "15", "conv_b(2), conv_a(1), conv_c(0)"]
+    # ADD_MESSAGE returns the CALLED CONV's cumulative tokens (per-conv, not global).
+    assert solution(queries) == ["true", "true", "true", "5", "10", "5", "conv_b(2), conv_a(1), conv_c(0)"]
 
 
 def test_top_k_tie_broken_alphabetically():
@@ -71,7 +72,9 @@ def test_top_k_k_equals_one():
         ["ADD_MESSAGE", "5", "conv_b", "user", "x", "5"],
         ["TOP_K_ACTIVE", "6", "1"],
     ]
-    assert solution(queries) == ["true", "true", "10", "15", "20", "conv_a(2)"]
+    # ADD_MESSAGE returns the CALLED CONV's cumulative tokens.
+    # conv_a: 5 → 10. conv_b: 5.
+    assert solution(queries) == ["true", "true", "5", "10", "5", "conv_a(2)"]
 
 
 def test_list_user_conversations_single_user():

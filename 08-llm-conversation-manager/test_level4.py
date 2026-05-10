@@ -133,7 +133,9 @@ def test_merge_interleaves_by_timestamp():
         # merged order by ts: ts=3(a), ts=5(b), ts=7(a), ts=9(b) → 4 messages
         ["GET_MESSAGE_COUNT",   "11", "a"],
     ]
-    assert solution(queries) == ["true", "true", "10", "20", "30", "40", "true", "4"]
+    # ADD_MESSAGE returns the called conv's CUMULATIVE tokens (per-conv).
+    # a: 10 → 10+30=40. b: 20 → 20+40=60.
+    assert solution(queries) == ["true", "true", "10", "20", "40", "60", "true", "4"]
 
 
 def test_merge_tie_surviving_before_absorbed():
@@ -178,7 +180,9 @@ def test_merge_with_context_limit_truncates():
         # drop b1(ts=5) → total=60≤100 → done
         ["GET_MESSAGE_COUNT",   "10", "a"],   # 1 message remains
     ]
-    assert solution(queries) == ["true", "true", "60", "60", "60", "1", "true", "1"]
+    # ADD_MESSAGE returns the called conv's cumulative tokens.
+    # a: 60 → 60+60=120. b: 60.
+    assert solution(queries) == ["true", "true", "60", "60", "120", "1", "true", "1"]
 
 
 def test_fork_absorbed_conv_does_not_exist():

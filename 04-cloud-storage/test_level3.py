@@ -160,9 +160,10 @@ def test_list_shared_with_sorted_owner_then_file():
         ["LIST_SHARED_WITH", "10","carol"],
     ]
     # sorted by owner ASC (alice < bob), then file_id ASC within owner
+    # UPLOAD returns alice's CUMULATIVE used bytes per L1 spec.
     assert solution(queries) == [
         "true", "true", "true",
-        "100", "100", "100",
+        "100", "200", "100",
         "true", "true", "true",
         "alice:a_file, alice:z_file, bob:m_file",
     ]
@@ -195,8 +196,10 @@ def test_worked_example_from_spec():
         ["DELETE",           "15", "alice", "photo"],
         ["LIST_SHARED_WITH", "16", "bob"],
     ]
+    # UPLOAD returns alice's CUMULATIVE used bytes per L1 spec.
+    # alice: doc=200 → photo adds 100 → cumulative 300.
     assert solution(queries) == [
-        "true", "true", "true", "200", "100",
+        "true", "true", "true", "200", "300",
         "true", "true", "true", "", "",
         "alice:doc, alice:photo",
         "alice:doc",
