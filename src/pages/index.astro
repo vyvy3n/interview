@@ -16,6 +16,7 @@ const sections = [
     title: 'Concurrency',
     note: 'required for Anthropic Fellows; both threading and asyncio',
     items: [
+      { href: '/concepts/concurrency-models',    title: 'When to use what',          hint: 'asyncio vs threading vs multiprocessing decision matrix' },
       { href: '/concepts/concurrency-threading', title: 'threading',                 hint: 'Lock, Event, Condition, Semaphore, ThreadPoolExecutor' },
       { href: '/concepts/concurrency-asyncio',   title: 'asyncio',                   hint: 'async/await, gather, wait_for, Lock, IsolatedAsyncioTestCase' },
       { href: '/concepts/rate-limiter-patterns', title: 'Rate Limiter Patterns',     hint: 'token bucket, leaky, sliding window; per-tenant + thread-safe' },
