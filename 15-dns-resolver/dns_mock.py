@@ -28,6 +28,12 @@ STATUSPAGE_NS:    ServerIP = "205.251.193.185"       # ns-441.awsdns-55.com.
 DEAD_NS:          ServerIP = "192.0.2.1"             # decommissioned server
 DEADNS_BACKUP:    ServerIP = "192.0.2.2"             # working backup for deadns.com.
 
+# Adversarial-test-only NS IPs (added for tests/test_dns_adversarial.py).
+MIXED_NS_A:       ServerIP = "203.0.113.10"          # ns1.mixed.com. (no glue path)
+MIXED_NS_B:       ServerIP = "203.0.113.11"          # ns2.mixed.com. (with glue, succeeds)
+GLUE_FIRST_NS:    ServerIP = "203.0.113.20"          # ns1.glueorder.com. (with glue, REFUSED)
+NOGLUE_SECOND_NS: ServerIP = "203.0.113.21"          # ns2.glueorder.com. (no glue, recurses, succeeds)
+
 # ─────── Convenient aliases used in test expected_log lists ───────
 ROOT = ROOT_SERVER
 COM  = COM_TLD
@@ -105,6 +111,35 @@ def _delegate_two_ns(
     )
 
 
+def _delegate_two_ns_mixed_glue(
+    zone: ZoneName,
+    glued_ns_name: str, glued_ns_ip: ServerIP,
+    unglued_ns_name: str,
+    glued_first: bool = True,
+) -> DNSResponse:
+    """Two-NS delegation where one NS has glue and the other does not.
+    Used by adversarial tests to probe NS-with-glue / NS-without-glue ordering."""
+    if glued_first:
+        authority = [
+            DNSRecord(name=zone, rdtype="NS", rdata=glued_ns_name),
+            DNSRecord(name=zone, rdtype="NS", rdata=unglued_ns_name),
+        ]
+    else:
+        authority = [
+            DNSRecord(name=zone, rdtype="NS", rdata=unglued_ns_name),
+            DNSRecord(name=zone, rdtype="NS", rdata=glued_ns_name),
+        ]
+    return DNSResponse(
+        status="NOERROR",
+        answer=None,
+        authority=authority,
+        additional=[
+            DNSRecord(name=glued_ns_name, rdtype="AAAA", rdata="2001:db8::5"),
+            DNSRecord(name=glued_ns_name, rdtype="A",    rdata=glued_ns_ip),
+        ],
+    )
+
+
 def _answer_a(name: ZoneName, ip: ServerIP) -> DNSResponse:
     return DNSResponse(
         status="NOERROR",
@@ -150,6 +185,10 @@ ZONES: "dict[ServerIP, dict[ZoneName, DNSResponse]]" = {
         # CNAME loop
         "loop-a.test.": _delegate("com.", "a.gtld-servers.net.", COM_TLD),
         "loop-b.test.": _delegate("com.", "a.gtld-servers.net.", COM_TLD),
+        # ── adversarial: root delegations for mixed-glue zones ──
+        "mixed.com.": _delegate("com.", "a.gtld-servers.net.", COM_TLD),
+        "glueorder.com.": _delegate("com.", "a.gtld-servers.net.", COM_TLD),
+        "ns2.glueorder.com.": _delegate("com.", "a.gtld-servers.net.", COM_TLD),
     },
 
     COM_TLD: {
@@ -178,6 +217,26 @@ ZONES: "dict[ServerIP, dict[ZoneName, DNSResponse]]" = {
         # Loop: loop-a CNAMES to loop-b which CNAMES back to loop-a
         "loop-a.test.": _delegate("test.", "ns.example.com.", EXAMPLE_NS),
         "loop-b.test.": _delegate("test.", "ns.example.com.", EXAMPLE_NS),
+        # ── adversarial: mixed-glue zones ──
+        # mixed.com. — first NS has no glue and CANNOT be resolved (NS name doesn't exist),
+        # second NS has glue and works. Must skip NS1 and use NS2.
+        "mixed.com.": _delegate_two_ns_mixed_glue(
+            "mixed.com.",
+            glued_ns_name="ns2.mixed.com.", glued_ns_ip=MIXED_NS_B,
+            unglued_ns_name="ns1.mixed.com.",
+            glued_first=False,  # unglued (broken) first, glued (works) second
+        ),
+        # glueorder.com. — first NS HAS glue but server REFUSED, second NS has NO glue
+        # but recursive resolution succeeds and that server answers.
+        "glueorder.com.": _delegate_two_ns_mixed_glue(
+            "glueorder.com.",
+            glued_ns_name="ns1.glueorder.com.", glued_ns_ip=GLUE_FIRST_NS,
+            unglued_ns_name="ns2.glueorder.com.",
+            glued_first=True,
+        ),
+        # ns2.glueorder.com. — recursive NS resolution, delegates with glue
+        # straight to NOGLUE_SECOND_NS which holds an A record for the NS.
+        "ns2.glueorder.com.": _delegate("glueorder.com.", "ns2-helper.glueorder.com.", NOGLUE_SECOND_NS),
     },
 
     NET_TLD: {
@@ -221,6 +280,15 @@ ZONES: "dict[ServerIP, dict[ZoneName, DNSResponse]]" = {
     DEADNS_BACKUP: {
         "deadns.com.": _answer_a("deadns.com.", "192.0.2.99"),
     },
+    # ── adversarial-only authoritative servers ──
+    MIXED_NS_B: {
+        "mixed.com.": _answer_a("mixed.com.", "203.0.113.50"),
+    },
+    NOGLUE_SECOND_NS: {
+        "glueorder.com.":  _answer_a("glueorder.com.",  "203.0.113.60"),
+        "ns2.glueorder.com.": _answer_a("ns2.glueorder.com.", NOGLUE_SECOND_NS),
+    },
+    # GLUE_FIRST_NS intentionally absent — returns REFUSED for everything.
 }
 
 
