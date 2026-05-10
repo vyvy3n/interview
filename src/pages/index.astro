@@ -1,6 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
+// Pinned curated path for the immediate Anthropic Fellows assessment.
+// Items here also appear in the topical sections below — this is a navigation
+// shortcut, not separate content.
+const fellowsPath = [
+  { href: '/concepts/codesignal-archetypes', title: 'CodeSignal Archetypes',          hint: 'understand the 4/6-level dispatch shape — the actual test format' },
+  { href: '/concepts/concurrency-models',    title: 'Concurrency: when to use what',  hint: 'asyncio vs threading vs multiprocessing decision matrix' },
+  { href: '/concepts/concurrency-threading', title: 'threading deep-dive',            hint: 'Lock, Event, Condition, ThreadPoolExecutor — half the test' },
+  { href: '/concepts/concurrency-asyncio',   title: 'asyncio deep-dive',              hint: 'async/await, gather, IsolatedAsyncioTestCase — the other half' },
+  { href: '/concepts/codesignal',            title: 'CodeSignal & Pytest',            hint: 'how to run tests on the platform; debugging tips' },
+];
+
 // Unified topic taxonomy. Diagrams + original derivations are integrated INTO
 // each concept page — there is no separate "raw notes" view.
 const sections = [
@@ -23,70 +34,121 @@ const sections = [
     ],
   },
   {
-    title: 'Patterns',
+    title: 'Pointers & Windows',
+    note: 'scan an array with a moving window or two indices',
     items: [
-      { href: '/concepts/two-pointers',         title: 'Two Pointers',          hint: 'opposite ends, fast/slow, partitioning' },
-      { href: '/concepts/sliding-window',       title: 'Sliding Window',        hint: 'fixed/variable subarray under invariant' },
-      { href: '/concepts/binary-search',        title: 'Binary Search',         hint: 'sorted array or monotonic predicate' },
-      { href: '/concepts/prefix-sum',           title: 'Prefix Sum',            hint: 'range sums, subarray-sum-equals-K' },
-      { href: '/concepts/dfs-backtracking',     title: 'DFS & Backtracking',    hint: 'enumerate, prune, undo' },
-      { href: '/concepts/bfs',                  title: 'BFS',                   hint: 'layered, implicit graph, bidirectional' },
-      { href: '/concepts/tree-divide-conquer',  title: 'Tree Divide & Conquer', hint: 'return-from-children pattern' },
-      { href: '/concepts/topo-sort',            title: 'Topological Sort',      hint: 'DAG order, indegree BFS or DFS' },
-      { href: '/concepts/union-find',           title: 'Union Find',            hint: 'connected components, path compression' },
-      { href: '/concepts/heap',                 title: 'Heap & Top-K',          hint: 'heapify O(n), kth element, streaming' },
-      { href: '/concepts/greedy',               title: 'Greedy',                hint: 'local choice → global optimum, intervals' },
+      { href: '/concepts/two-pointers',          title: 'Two Pointers',              hint: 'opposite ends, fast/slow, partitioning' },
+      { href: '/concepts/sliding-window',        title: 'Sliding Window',            hint: 'fixed/variable subarray under invariant' },
+      { href: '/concepts/prefix-sum',            title: 'Prefix Sum',                hint: 'range sums, subarray-sum-equals-K' },
+      { href: '/concepts/monotonic-stack',       title: 'Monotonic Stack',           hint: 'next greater/smaller, min stack' },
+    ],
+  },
+  {
+    title: 'Search & Selection',
+    note: 'find or rank without sorting everything',
+    items: [
+      { href: '/concepts/binary-search',         title: 'Binary Search',             hint: 'sorted array or monotonic predicate' },
+      { href: '/concepts/heap',                  title: 'Heap & Top-K',              hint: 'heapify O(n), kth element, streaming' },
+      { href: '/concepts/quickselect',           title: 'QuickSelect',               hint: 'kth largest in O(n) avg, partition' },
+    ],
+  },
+  {
+    title: 'Trees & Graphs',
+    note: 'traverse, explore, decompose',
+    items: [
+      { href: '/concepts/bfs',                   title: 'BFS',                       hint: 'layered, implicit graph, bidirectional' },
+      { href: '/concepts/dfs-backtracking',      title: 'DFS & Backtracking',        hint: 'enumerate, prune, undo' },
+      { href: '/concepts/tree-divide-conquer',   title: 'Tree Divide & Conquer',     hint: 'return-from-children pattern' },
+      { href: '/concepts/topo-sort',             title: 'Topological Sort',          hint: 'DAG order, indegree BFS or DFS' },
+      { href: '/concepts/union-find',            title: 'Union Find',                hint: 'connected components, path compression' },
+    ],
+  },
+  {
+    title: 'Greedy',
+    items: [
+      { href: '/concepts/greedy',                title: 'Greedy',                    hint: 'local choice → global optimum, intervals' },
     ],
   },
   {
     title: 'Dynamic Programming',
     note: 'start with Fundamentals; pick the topology that matches the problem',
     items: [
-      { href: '/concepts/dp',                   title: 'DP Fundamentals',       hint: 'state · transition · order · 3 flavors' },
-      { href: '/concepts/dp-sequence',          title: 'Sequence DP (1D)',      hint: 'house robber, decode ways, LIS, stocks' },
-      { href: '/concepts/dp-grid',              title: 'Grid / Coordinate DP',  hint: 'unique paths, min path sum, max square' },
-      { href: '/concepts/dp-knapsack',          title: 'Knapsack DP',           hint: '0/1, unbounded, count, partition' },
-      { href: '/concepts/dp-interval',          title: 'Interval DP',           hint: 'palindromes, burst balloons, matrix chain' },
-      { href: '/concepts/dp-two-sequence',      title: 'Two-Sequence DP',       hint: 'LCS, edit distance, regex match' },
+      { href: '/concepts/dp',                    title: 'DP Fundamentals',           hint: 'state · transition · order · 3 flavors' },
+      { href: '/concepts/dp-sequence',           title: 'Sequence DP (1D)',          hint: 'house robber, decode ways, LIS, stocks' },
+      { href: '/concepts/dp-grid',               title: 'Grid / Coordinate DP',      hint: 'unique paths, min path sum, max square' },
+      { href: '/concepts/dp-knapsack',           title: 'Knapsack DP',               hint: '0/1, unbounded, count, partition' },
+      { href: '/concepts/dp-interval',           title: 'Interval DP',               hint: 'palindromes, burst balloons, matrix chain' },
+      { href: '/concepts/dp-two-sequence',       title: 'Two-Sequence DP',           hint: 'LCS, edit distance, regex match' },
     ],
   },
   {
     title: 'Data Structures',
     items: [
-      { href: '/concepts/hash-table',           title: 'Hash Table Tricks',     hint: 'count, prefix-hash, two-sum family' },
-      { href: '/concepts/trie',                 title: 'Trie / Prefix Tree',    hint: 'word search, prefix queries' },
-      { href: '/concepts/monotonic-stack',      title: 'Monotonic Stack',       hint: 'next greater/smaller, min stack' },
-      { href: '/concepts/linked-list',          title: 'Linked List',           hint: 'dummy head, doubly linked, reversal' },
-      { href: '/concepts/segment-tree',         title: 'Segment Tree & BIT',    hint: 'range queries + updates in O(log n)' },
+      { href: '/concepts/hash-table',            title: 'Hash Table Tricks',         hint: 'count, prefix-hash, two-sum family' },
+      { href: '/concepts/trie',                  title: 'Trie / Prefix Tree',        hint: 'word search, prefix queries' },
+      { href: '/concepts/linked-list',           title: 'Linked List',               hint: 'dummy head, doubly linked, reversal' },
+      { href: '/concepts/segment-tree',          title: 'Segment Tree & BIT',        hint: 'range queries + updates in O(log n)' },
     ],
   },
   {
-    title: 'Algorithms / Tricks',
+    title: 'Number & String Math',
     items: [
-      { href: '/concepts/quickselect',          title: 'QuickSelect / Partition', hint: 'kth largest in O(n) avg' },
-      { href: '/concepts/big-int-strings',      title: 'Big-Int String Math',   hint: 'add/subtract/multiply long numbers' },
-      { href: '/concepts/fast-power',           title: 'Fast Power',            hint: 'a^n mod m in O(log n)' },
+      { href: '/concepts/big-int-strings',       title: 'Big-Int String Math',       hint: 'add/subtract/multiply long numbers' },
+      { href: '/concepts/fast-power',            title: 'Fast Power',                hint: 'a^n mod m in O(log n)' },
     ],
   },
   {
     title: 'Design',
     items: [
-      { href: '/concepts/lru-cache',            title: 'LRU Cache',             hint: 'hash + doubly linked list' },
-      { href: '/concepts/bst-iterator',         title: 'BST Iterator',          hint: 'in-order traversal, controlled stack' },
-      { href: '/concepts/state-serialization',  title: 'State Serialization',   hint: 'resumable iterator, length-prefix bytes, BACKUP/RESTORE re-anchoring' },
-      { href: '/concepts/ood',                  title: 'OOD Principles',        hint: 'SOLID, 5C method, design patterns' },
-      { href: '/concepts/system-design',        title: 'System Design Basics',  hint: '4S, QPS, cache, sharding' },
+      { href: '/concepts/lru-cache',             title: 'LRU Cache',                 hint: 'hash + doubly linked list' },
+      { href: '/concepts/bst-iterator',          title: 'BST Iterator',              hint: 'in-order traversal, controlled stack' },
+      { href: '/concepts/state-serialization',   title: 'State Serialization',       hint: 'resumable iterator, length-prefix bytes, BACKUP/RESTORE re-anchoring' },
+      { href: '/concepts/ood',                   title: 'OOD Principles',            hint: 'SOLID, 5C method, design patterns' },
+      { href: '/concepts/system-design',         title: 'System Design Basics',      hint: '4S, QPS, cache, sharding' },
     ],
   },
 ];
+
+// Auto-generated A-Z index from all topical sections (deduplicated).
+const seen = new Set();
+const allItems = sections
+  .flatMap(s => s.items)
+  .filter(item => {
+    if (seen.has(item.href)) return false;
+    seen.add(item.href);
+    return true;
+  })
+  .sort((a, b) => a.title.localeCompare(b.title));
+
+const totalConcepts = allItems.length;
 ---
 <Layout title="interview cheat sheet" showHome={false}>
   <h1>cheat sheet</h1>
-  <p style="color: var(--muted); margin-top: -4px;">quick review for coding interviews — tap a topic.</p>
+  <p style="color: var(--muted); margin-top: -4px;">
+    {totalConcepts} concepts across {sections.length} topics — tap a topic, or jump to the
+    <a href="#az-index">A–Z index</a>.
+  </p>
+
+  <div class="section featured">
+    <h2>🎯 Anthropic Fellows — prep path</h2>
+    <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
+      curated 5-step read order for the actual 90-min assessment
+    </p>
+    <ul class="concepts">
+      {fellowsPath.map(item => (
+        <li>
+          <a href={item.href}>
+            {item.title}
+            <small>{item.hint}</small>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
 
   {sections.map(section => (
     <div class="section">
-      <h2>{section.title}</h2>
+      <h2>{section.title} <span class="count">({section.items.length})</span></h2>
       {section.note && <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">{section.note}</p>}
       <ul class="concepts">
         {section.items.map(item => (
@@ -100,4 +162,54 @@ const sections = [
       </ul>
     </div>
   ))}
+
+  <div class="section az" id="az-index">
+    <h2>A–Z index</h2>
+    <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
+      every concept, alphabetical — for when you know the name
+    </p>
+    <ul class="az-grid">
+      {allItems.map(item => (
+        <li><a href={item.href}>{item.title}</a></li>
+      ))}
+    </ul>
+  </div>
 </Layout>
+
+<style>
+  .section.featured {
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px 12px 4px;
+    margin-bottom: 1.6rem;
+  }
+  .section.featured h2 {
+    color: var(--accent);
+  }
+  .section h2 .count {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 0.75rem;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 4px;
+  }
+  .az-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 4px 12px;
+  }
+  .az-grid li {
+    border: none;
+    padding: 4px 0;
+  }
+  .az-grid li a {
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .az-grid li a:hover { color: var(--accent); }
+</style>
