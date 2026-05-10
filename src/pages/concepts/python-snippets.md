@@ -7,32 +7,74 @@ title: Python Snippets
 
 > Lean one-line-per-pattern reference. Every snippet is something I actually used in problems 01-14.
 
-## 🚨 Top 20 — survival kit
+## 🚨 Survival kit
 
-If you only remember these, you can solve ~85% of what shows up:
+The patterns where forgetting the syntax kills you mid-test. Below this is deeper reference.
 
 ```python
-# SORT — multi-key (DESC primary + ASC tiebreak)
+# ─────── LIST — CRUD ───────
+lst = []
+lst.append(x)             # add to end           O(1)
+lst.pop()                 # remove + return LAST O(1)
+lst.pop(0)                # remove first         O(n)  ← use deque instead
+lst.pop(i)                # remove at index      O(n)
+lst.remove(x)             # remove first by VALUE — ValueError if missing
+lst.insert(i, x)          # insert at index      O(n)
+lst.extend(other)         # append all from another iterable
+lst[i]; lst[i] = x; del lst[i]
+x in lst; len(lst); lst[-1]; lst[:k]; lst[k:]; lst[::-1]
+sum(lst); min(lst); max(lst); any(lst); all(lst)
+
+# ─────── DICT — CRUD ───────
+d = {}
+d[k] = v                          # set / overwrite
+d[k]                              # get — KeyError if missing
+d.get(k, default)                 # safe get
+d.pop(k)                          # KeyError if missing
+d.pop(k, None)                    # safe pop, returns None if missing
+del d[k]                          # KeyError if missing
+d.setdefault(k, []).append(v)     # init-list-then-append (NO 2nd lookup)
+k in d; len(d)
+list(d.keys()); list(d.values()); list(d.items())
+{**a, **b}                        # merge (b wins on conflict)
+
+# ─────── SET — CRUD ───────
+s = set()
+s.add(x)
+s.remove(x)               # KeyError if missing
+s.discard(x)              # safe — no error if missing
+x in s; len(s)
+a | b; a & b; a - b       # union / intersection / difference
+
+# ─────── SORT — multi-key (DESC primary + ASC tiebreak) ───────
 sorted(items, key=lambda x: (-x.score, x.id))[:k]
+list.sort(key=fn, reverse=True)                # in-place
 
-# DICT — safe ops, never KeyError
-d.get(k, default);  d.pop(k, None);  d.setdefault(k, []).append(v)
-
-# COUNTER / GROUPING
-from collections import defaultdict
+# ─────── COUNTER / GROUPING ───────
+from collections import defaultdict, Counter
 counts = defaultdict(int);   counts[k] += 1
 groups = defaultdict(list);  groups[k].append(v)
+Counter(words).most_common(5)
 
-# FIFO — deque, NOT list.pop(0)
+# ─────── FIFO QUEUE — deque, NOT list ───────
 from collections import deque
-q = deque();  q.append(x);  q.popleft()
+q = deque();  q.append(x);  q.popleft()        # both O(1)
 
-# LRU — OrderedDict
+# ─────── LRU — OrderedDict ───────
 from collections import OrderedDict
-od.move_to_end(k);   od.popitem(last=False)
+od.move_to_end(k);   od.popitem(last=False)    # mark MRU; pop LRU
 
-# THREADING
-self._lock = threading.RLock()
+# ─────── HEAP — priority queue ───────
+import heapq
+heapq.heappush(h, (priority, item));  heapq.heappop(h)
+heapq.nsmallest(k, items, key=fn);    heapq.nlargest(k, items, key=fn)
+
+# ─────── STRING ───────
+s.startswith(prefix);  s.endswith(suffix)
+s.split(":");  ":".join(parts);  f"{name}({count})"
+
+# ─────── THREADING ───────
+self._lock = threading.RLock()                 # RLock — methods can call methods
 with self._lock: ...
 cond = threading.Condition(self._lock)
 with cond: cond.wait_for(lambda: predicate, timeout=t)
@@ -40,23 +82,23 @@ with cond: cond.notify_all()
 evt = threading.Event();  evt.set();  evt.wait(timeout)
 threading.Thread(target=fn, daemon=True).start()
 
-# ASYNCIO
-self._lock = asyncio.Lock()
+# ─────── ASYNCIO ───────
+self._lock = asyncio.Lock()                    # NOT thread-safe; coroutines only
 async with self._lock: ...
 await asyncio.gather(*coros)
 class TestL5(unittest.IsolatedAsyncioTestCase): ...
 
-# THE THREE WIN-POINTS PATTERNS
+# ─────── THE 3 WIN-POINTS PATTERNS ───────
 expired = expiry is not None and ts >= expiry           # half-open TTL
-tokens  = min(max_t, tokens + rate * (now - last_ts))   # lazy refill
+tokens  = min(max_t, tokens + rate * (now - last_ts))   # lazy refill (do FIRST)
 ", ".join(f"{e.id}({e.score})" for e in sorted(items, key=lambda x: (-x.score, x.id))[:k])
 
-# CAS (atomic compare-and-set)
+# ─────── CAS (atomic compare-and-set) ───────
 with self._lock:
     if state[k] != expected: return False
     state[k] = new; return True
 
-# ATOMIC BATCH (validate-all-then-commit)
+# ─────── ATOMIC BATCH (validate-all-then-commit) ───────
 with self._lock:
     if not all(self._can_apply(x) for x in items): return -1
     for x in items: self._apply(x)
