@@ -12,17 +12,21 @@ from typing import Callable
 
 class AsyncOrderedPrinter:
     def __init__(self) -> None:
-        # TODO: create asyncio.Event objects to coordinate ordering
-        raise NotImplementedError
+        self._first_done = asyncio.Event()
+        self._second_done = asyncio.Event()
 
     async def first(self, print_fn: Callable[[], None]) -> None:
         """Run print_fn, then signal that first is done."""
-        raise NotImplementedError
+        print_fn()
+        self._first_done.set()
 
     async def second(self, print_fn: Callable[[], None]) -> None:
         """Wait for first to finish, run print_fn, then signal second is done."""
-        raise NotImplementedError
+        await self._first_done.wait()
+        print_fn()
+        self._second_done.set()
 
     async def third(self, print_fn: Callable[[], None]) -> None:
         """Wait for second to finish, then run print_fn."""
-        raise NotImplementedError
+        await self._second_done.wait()
+        print_fn()

@@ -13,12 +13,14 @@ class Counter:
     def __init__(self) -> None:
         self._count = 0
         # TODO: add a threading.Lock here
-        raise NotImplementedError
+        self._lock = threading.Lock()
 
     def increment(self, delta: int = 1) -> None:
         """Add delta to the counter.  Thread-safe."""
-        raise NotImplementedError
+        with self._lock:
+            self._count += delta
 
     def value(self) -> int:
         """Return the current count.  Thread-safe."""
-        raise NotImplementedError
+        with self._lock:
+            return self._count

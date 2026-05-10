@@ -31,9 +31,9 @@ def _run_fizzbuzz(n, timeout=10):
             output.append(value)
 
     threads = [
-        threading.Thread(target=fb.fizz,     args=(lambda: record("fizz"),)),
-        threading.Thread(target=fb.buzz,     args=(lambda: record("buzz"),)),
-        threading.Thread(target=fb.fizzbuzz, args=(lambda: record("fizzbuzz"),)),
+        threading.Thread(target=fb.fizz,     args=(lambda s: record(s),)),
+        threading.Thread(target=fb.buzz,     args=(lambda s: record(s),)),
+        threading.Thread(target=fb.fizzbuzz, args=(lambda s: record(s),)),
         threading.Thread(target=fb.number,   args=(lambda v: record(v),)),
     ]
     for t in threads:

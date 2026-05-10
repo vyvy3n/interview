@@ -26,4 +26,32 @@ async def gather_with_timeout(coros: list, timeout: float) -> list:
     Returns:
         list of length len(coros), in input order.
     """
-    raise NotImplementedError
+    if not coros:
+        return []
+
+    # asyncio.wait expects Tasks, not bare coroutines (problem gotcha #1).
+    tasks = [asyncio.create_task(c) for c in coros]
+
+    # Wait until every task has finished OR the wall timeout elapses.
+    _, pending = await asyncio.wait(tasks, timeout=timeout)
+
+    # Slow tasks are still in ``pending`` — cancel them (gotcha #2).
+    for t in pending:
+        t.cancel()
+
+    # Let cancelled tasks run their cleanup / absorb CancelledError (gotcha #3).
+    if pending:
+        await asyncio.gather(*pending, return_exceptions=True)
+
+    # Build results in the same order as ``coros`` (gotcha #4: index = order).
+    out: list = []
+    for t in tasks:
+        if t.cancelled():
+            out.append(TIMEOUT_SENTINEL)
+        else:
+            exc = t.exception()
+            if exc is not None:
+                out.append(TIMEOUT_SENTINEL)
+            else:
+                out.append(t.result())
+    return out
