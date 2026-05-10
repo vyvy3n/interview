@@ -14,3 +14,8 @@ _extracted
 .venv
 __pycache__
 *.pyc
+
+# Mock-problem reference solutions — kept local, not checked in.
+# Practitioners should write their own solution.py from dns_exercise.py.
+15-dns-resolver/solution.py
+15-dns-resolver/solution_independent.py
