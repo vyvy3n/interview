@@ -1,32 +1,14 @@
 # Level 6 — Step 6: Cached batch resolution
 
-> Verbatim from the assessment, **partial** — the screenshot scrolled past before the full description was visible. The text below is everything that was on screen.
+> Verbatim from the assessment.
 
 Implement `resolve_all()`. Given a list of domains, resolve each one and return a mapping from each input domain (note that inputs are not necessarily normalized) to its resolved IP (or `None` if it couldn't be resolved).
 
-The key requirement: cache the result of every `send_query` call so that no `(name, server)` pair is queried twice across the…
+The key requirement: cache the result of every `send_query` call so that no `(name, server)` pair is queried twice across the batch. Many domains share the same delegation path (e.g. they all query ROOT, then the `.com` TLD), so caching eliminates redundant work.
 
-*[screenshot cuts off here]*
-
-The `resolve_all()` signature visible in `dns_exercise.py` was:
-
-```python
-def resolve_all(
-    domains: list[str],
-    max_workers: int = 5,
-    max_queries: int = 15,
-) -> dict[str, ServerIP | None]:
-    """Resolve all domains, caching calls to send_query.
-
-    The cache must be scoped to this call (not global) so
-    that each invocation of resolve_all() starts fresh.
-
-    Starting at Step 7, at most max_workers calls to send_query
-    may be in flight at any time.
-    """
-    # TODO: STEP 6: YOUR CODE HERE
-    return {}
-```
+- `NXDOMAIN` and `REFUSED` responses should also be cached.
+- `max_queries` is the limit per domain. A cache hit does not call `send_query`, but still counts against the limit for that domain.
+- The cache must be scoped to each `resolve_all()` call — not persisted globally.
 
 ```
 ./test.sh 6

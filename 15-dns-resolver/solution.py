@@ -5,7 +5,7 @@ That makes Level 6 (caching) and Level 7 (bounded concurrency) trivial wrappers
 on top of the Level 1-5 logic.
 """
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Callable
 
 from dns_mock import ROOT_SERVER, send_query
@@ -121,24 +121,56 @@ def resolve_all(
 ) -> dict:
     """Resolve every domain in `domains`, return {input_domain: ip_or_None}.
 
-    - Cache scoped to this call: (normalized_name, server_ip) -> DNSResponse.
-    - At most max_workers send_query calls in flight at any time.
-    - Result keys preserve the original input form (case + missing dot).
+    Implements the Step 6 + Step 7 requirements:
+      - Cache (name, server) -> DNSResponse, scoped to this call.
+      - NXDOMAIN and REFUSED responses are cached just like NOERROR.
+      - max_queries is per-domain. A cache hit does not call send_query but
+        still counts against that domain's budget (handled by _query).
+      - At most max_workers send_query calls in flight at any time (Semaphore).
+      - If a (name, server) query is already in flight, wait for it rather
+        than sending a duplicate (Future-based single-flight dedup).
+      - Result keys preserve the original input form.
     """
     cache: dict = {}
-    cache_lock = threading.Lock()
+    in_flight: dict = {}            # (name, server) -> Future[DNSResponse]
+    state_lock = threading.Lock()
     semaphore = threading.Semaphore(max_workers)
 
     def cached_send_query(name: str, server_ip: str) -> DNSResponse:
         key = (name, server_ip)
-        with cache_lock:
+        # Phase 1: under the lock, decide whether to be the runner, the waiter,
+        # or a cache reader — without doing any I/O.
+        with state_lock:
             if key in cache:
                 return cache[key]
-        # cache miss — actually call send_query, gated by the in-flight semaphore.
-        with semaphore:
-            response = send_query(name, server_ip)
-        with cache_lock:
+            existing = in_flight.get(key)
+            if existing is not None:
+                future = existing
+                we_run = False
+            else:
+                future = Future()
+                in_flight[key] = future
+                we_run = True
+
+        # Phase 2: waiters block on the runner's Future. Releases the lock
+        # so the runner can acquire it later to publish the result.
+        if not we_run:
+            return future.result()
+
+        # Phase 3: we're the runner — bound concurrency, then call send_query.
+        try:
+            with semaphore:
+                response = send_query(name, server_ip)
+        except BaseException as exc:
+            with state_lock:
+                in_flight.pop(key, None)
+            future.set_exception(exc)
+            raise
+
+        with state_lock:
             cache[key] = response
+            in_flight.pop(key, None)
+        future.set_result(response)
         return response
 
     def resolve_one(input_domain: str) -> "str | None":
