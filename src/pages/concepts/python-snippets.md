@@ -7,6 +7,65 @@ title: Python Snippets
 
 > Lean one-line-per-pattern reference. Every snippet is something I actually used in problems 01-14.
 
+## 🚨 Top 20 — survival kit
+
+If you only remember these, you can solve ~85% of what shows up:
+
+```python
+# SORT — multi-key (DESC primary + ASC tiebreak)
+sorted(items, key=lambda x: (-x.score, x.id))[:k]
+
+# DICT — safe ops, never KeyError
+d.get(k, default);  d.pop(k, None);  d.setdefault(k, []).append(v)
+
+# COUNTER / GROUPING
+from collections import defaultdict
+counts = defaultdict(int);   counts[k] += 1
+groups = defaultdict(list);  groups[k].append(v)
+
+# FIFO — deque, NOT list.pop(0)
+from collections import deque
+q = deque();  q.append(x);  q.popleft()
+
+# LRU — OrderedDict
+from collections import OrderedDict
+od.move_to_end(k);   od.popitem(last=False)
+
+# THREADING
+self._lock = threading.RLock()
+with self._lock: ...
+cond = threading.Condition(self._lock)
+with cond: cond.wait_for(lambda: predicate, timeout=t)
+with cond: cond.notify_all()
+evt = threading.Event();  evt.set();  evt.wait(timeout)
+threading.Thread(target=fn, daemon=True).start()
+
+# ASYNCIO
+self._lock = asyncio.Lock()
+async with self._lock: ...
+await asyncio.gather(*coros)
+class TestL5(unittest.IsolatedAsyncioTestCase): ...
+
+# THE THREE WIN-POINTS PATTERNS
+expired = expiry is not None and ts >= expiry           # half-open TTL
+tokens  = min(max_t, tokens + rate * (now - last_ts))   # lazy refill
+", ".join(f"{e.id}({e.score})" for e in sorted(items, key=lambda x: (-x.score, x.id))[:k])
+
+# CAS (atomic compare-and-set)
+with self._lock:
+    if state[k] != expected: return False
+    state[k] = new; return True
+
+# ATOMIC BATCH (validate-all-then-commit)
+with self._lock:
+    if not all(self._can_apply(x) for x in items): return -1
+    for x in items: self._apply(x)
+```
+
+Everything below this line is reference detail.
+
+---
+
 ## Sorting
 
 ```python
