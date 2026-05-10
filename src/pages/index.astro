@@ -8,7 +8,17 @@ const sections = [
     title: 'Interview Workflow',
     note: 'how to actually run the tests during a coding round',
     items: [
-      { href: '/concepts/codesignal',          title: 'CodeSignal & Pytest',   hint: 'ICF format, pytest commands, debugging' },
+      { href: '/concepts/codesignal',            title: 'CodeSignal & Pytest',       hint: 'ICF format, pytest commands, debugging' },
+      { href: '/concepts/codesignal-archetypes', title: 'CodeSignal Archetypes',     hint: '4/6-level dispatch shape, 8 problem domains, in-repo practice' },
+    ],
+  },
+  {
+    title: 'Concurrency',
+    note: 'required for Anthropic Fellows; both threading and asyncio',
+    items: [
+      { href: '/concepts/concurrency-threading', title: 'threading',                 hint: 'Lock, Event, Condition, Semaphore, ThreadPoolExecutor' },
+      { href: '/concepts/concurrency-asyncio',   title: 'asyncio',                   hint: 'async/await, gather, wait_for, Lock, IsolatedAsyncioTestCase' },
+      { href: '/concepts/rate-limiter-patterns', title: 'Rate Limiter Patterns',     hint: 'token bucket, leaky, sliding window; per-tenant + thread-safe' },
     ],
   },
   {
@@ -62,6 +72,7 @@ const sections = [
     items: [
       { href: '/concepts/lru-cache',            title: 'LRU Cache',             hint: 'hash + doubly linked list' },
       { href: '/concepts/bst-iterator',         title: 'BST Iterator',          hint: 'in-order traversal, controlled stack' },
+      { href: '/concepts/state-serialization',  title: 'State Serialization',   hint: 'resumable iterator, length-prefix bytes, BACKUP/RESTORE re-anchoring' },
       { href: '/concepts/ood',                  title: 'OOD Principles',        hint: 'SOLID, 5C method, design patterns' },
       { href: '/concepts/system-design',        title: 'System Design Basics',  hint: '4S, QPS, cache, sharding' },
     ],
