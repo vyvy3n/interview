@@ -1,65 +1,94 @@
-# Anthropic CodeSignal Interview Prep
+# Anthropic Fellows / CodeSignal Interview Prep
 
-Comprehensive practice problems mirroring the Anthropic CodeSignal OA format:
+## ⚠️ Read this first if you're prepping for the actual Anthropic Fellows assessment
 
-- **Single problem, 4 progressive levels** (each unlocks the next)
-- **90 minutes total** — L1/L2 fast, L3 eats time, L4 is a sprint
-- **Domain modeling, not algorithms** — small system that absorbs new requirements
-- **520+ score (3 of 4 levels) to advance** at most companies that use this format
+The real Anthropic Fellows OA differs from the canonical "4-level" CodeSignal shape:
 
-## Format conventions
+- **6 levels, not 4.** 90 minutes total.
+- **`unittest` framework** (not a custom runner).
+- **Concurrency required** — `threading` OR `asyncio` from stdlib.
+- **"Standard LeetCode-style problems"** is the prep recommendation.
 
-Every problem follows the same canonical CodeSignal shape:
+**→ Use Track C (problems 09, 10) and the concurrency primer for the actual Fellows assessment.**
 
-```python
-def solution(queries: list[list[str]]) -> list[str]:
-    ...
-```
+Tracks A and B (problems 01–08) are 4-level domain-modeling and useful as warmups, but they don't match the 6-level + concurrency format.
 
-- `queries` is a list of operations. Each operation is a list of strings.
-- The first element of each operation is the command name.
-- Return one string per query (use `""` for null/error/no-op).
+---
 
-## Problems
+## Tracks
 
-### Track A — General domain modeling
+### Track A — Canonical 4-level domain modeling (warmup)
 
-These mirror the canonical Anthropic OA shape. Good warmup before the LLM-systems track.
+Mirrors the general Anthropic OA shape. Single `solution(queries) -> list[str]` function, 4 progressive levels.
 
 | # | Problem | Status | Tests |
 |---|---------|--------|-------|
 | 01 | [Bank Transaction System](./01-bank-transactions/) | ✅ all 4 levels solved | 60 |
-| 02 | [In-Memory Database](./02-in-memory-db/) | scaffolded | 66 |
+| 02 | [In-Memory Database](./02-in-memory-db/) | ✅ all 4 levels solved | 66 |
 | 03 | [File System](./03-file-system/) | scaffolded | 71 |
 | 04 | [Cloud Storage](./04-cloud-storage/) | scaffolded | 59 |
 
-### Track B — LLM systems (Anthropic Research Fellow / ML Engineer)
+### Track B — LLM systems (4-level, ML-flavored)
 
-These mirror the engineering work an Anthropic Research Fellow would do — LLM serving infrastructure with KV-cache routing, prompt caching, token-bucket rate limiting, and chatbot state management.
+LLM serving infrastructure problems. Same 4-level shape as Track A.
 
 | # | Problem | Status | Tests |
 |---|---------|--------|-------|
 | 05 | [LLM Request Router](./05-llm-request-router/) — KV-cache-aware GPU scheduling | scaffolded | 57 |
 | 06 | [LLM Prompt Cache](./06-llm-prompt-cache/) — TTL+LRU + prefix lookup | scaffolded | 57 |
-| 07 | [LLM Rate Limiter](./07-llm-rate-limiter/) — token bucket with refill + tier merge | scaffolded | 58 |
+| 07 | [LLM Rate Limiter](./07-llm-rate-limiter/) — token bucket + lazy refill | scaffolded | 58 |
 | 08 | [LLM Conversation Manager](./08-llm-conversation-manager/) — context window + fork/merge | scaffolded | 59 |
+
+### Track C — 6-level + concurrency (matches Anthropic Fellows assessment)
+
+Mirrors the actual Fellows assessment format: 6 levels, `unittest` tests, concurrency at L5–L6.
+
+| # | Problem | Concurrency style | Tests |
+|---|---------|-------------------|-------|
+| 09 | [Concurrent Task Scheduler](./09-concurrent-task-scheduler/) | `threading` (Lock, Event, Condition) | 96 |
+| 10 | [Async KV Store](./10-thread-safe-keyvalue/) | `asyncio` (Lock, IsolatedAsyncioTestCase) | 117 |
+
+### Concurrency Primer
+
+10 standalone exercises building muscle memory for `threading` and `asyncio` primitives. **Do these BEFORE attempting Track C if your concurrency reflexes are rusty.**
+
+[`concurrency-primer/`](./concurrency-primer/) — thread-safe counter, print-in-order, bounded blocking queue, async rate limiter, RWLock, FizzBuzz multithreaded, etc.
+
+---
+
+## Recommended path for Anthropic Fellows assessment (5-day prep)
+
+| Day | What | Why |
+|---|---|---|
+| 1 | Concurrency primer (exercises 01–05) | Build threading + asyncio reflexes |
+| 2 | Concurrency primer (06–10), start Problem 09 | Solidify, then 6-level practice |
+| 3 | Finish Problem 09, start Problem 10 | Both concurrency styles |
+| 4 | Finish Problem 10, take CodeSignal's free practice OA on their platform | Timed dry-run, get used to UI |
+| 5 | Take the actual assessment | Fresh, rested |
+
+For warmup: do 1-2 levels of Problem 01 or 02 first if you've never done a CodeSignal-style problem at all.
+
+## Format conventions
+
+**Tracks A and B** (4-level): single `solution(queries) -> list[str]` function. Custom test runner via `python3 test_levelN.py`.
+
+**Track C** (6-level): a class (`TaskScheduler`, `KVStore`) with methods. Tests use `unittest`. Run via `python3 test_levelN.py`.
 
 ## How to use
 
 For each problem:
-
 1. Read `spec/level1.md`. Don't peek at later levels — that's the point.
-2. Implement `solution.py` until `python3 test_level1.py` is green.
-3. Commit. Repeat for levels 2–4.
+2. Implement until `python3 test_level1.py` is green.
+3. Commit. Repeat for next level.
 
 Commits track the learning record — each level's "before/after" is preserved.
 
-## Recommended order
-
-1. Start with **01-bank-transactions** to learn the 4-level pattern (canonical example, most-cited).
-2. Pick any of **02–04** to practice fresh — different domain, same shape.
-3. Move to **Track B** (problems 05–08) for the harder, ML-flavored systems work — these are closer to what you'd build at Anthropic in the role itself.
-
 ## Total
 
-8 problems × 4 levels = 32 progressively-difficult systems-modeling exercises with 487 tests.
+| | Problems | Levels | Tests |
+|---|---|---|---|
+| Track A | 4 | 16 | 256 |
+| Track B | 4 | 16 | 231 |
+| Track C | 2 | 12 | 213 |
+| Concurrency primer | 10 exercises | — | ~50 |
+| **Total** | **10 problems + 10 exercises** | **44 levels** | **~750 tests** |
