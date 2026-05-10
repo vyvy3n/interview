@@ -152,9 +152,13 @@ const totalConcepts = allItems.length;
 ---
 <Layout title="interview cheat sheet" showHome={false}>
   <h1>cheat sheet</h1>
-  <p style="color: var(--muted); margin-top: -4px;">
-    {totalConcepts} concepts across {sections.length} topics — tap a topic, or jump to the
-    <a href="#az-index">A–Z index</a>.
+  <p class="quick-bar">
+    <a href="/concepts/six-level-starter">📋 template</a>
+    <a href="/concepts/python-snippets">🐍 snippets</a>
+    <a href="#az-index">A–Z</a>
+  </p>
+  <p style="color: var(--muted); margin-top: -2px;">
+    {totalConcepts} concepts across {sections.length} topics — tap any chip below.
   </p>
 
   <div class="section problems-section">
@@ -238,6 +242,26 @@ const totalConcepts = allItems.length;
 </Layout>
 
 <style>
+  .quick-bar {
+    display: flex;
+    gap: 14px;
+    margin: 4px 0 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    flex-wrap: wrap;
+  }
+  .quick-bar a {
+    text-decoration: none;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  @media (max-width: 640px) {
+    .quick-bar { gap: 10px; padding: 7px 9px; }
+    .quick-bar a { font-size: 0.85rem; }
+  }
+
   .problems-section { margin: 1rem 0 1.5rem; }
   .problems-subhead {
     font-size: 0.72rem;
