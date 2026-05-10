@@ -148,6 +148,7 @@ main table {
   margin: 1em 0;
   display: block;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 main th, main td {
@@ -160,4 +161,101 @@ main th, main td {
 main th {
   background: var(--code-bg);
   font-weight: 600;
+}
+
+/* iOS-friendly horizontal scroll for code blocks */
+pre {
+  -webkit-overflow-scrolling: touch;
+  tab-size: 2;
+}
+
+/* ---------------------------------------------------------------- */
+/* Mobile (≤640px) — tighter padding, larger tap targets, readable  */
+/* code without breaking indentation.                                 */
+/* ---------------------------------------------------------------- */
+@media (max-width: 640px) {
+  main {
+    padding: 12px 12px 64px;
+  }
+
+  body { font-size: 15px; }
+
+  h1 { font-size: 1.35rem; margin: 0.3em 0 0.5em; }
+  h2 { font-size: 1.1rem; margin: 1.2em 0 0.3em; }
+  h3 { font-size: 1rem; }
+
+  header.site { padding: 9px 12px; }
+  header.site a.home { font-size: 14px; }
+
+  /* Code blocks: keep monospace + indentation; allow horizontal scroll
+     with a visible scrollbar so it's clear you can swipe. */
+  pre {
+    font-size: 13px;
+    padding: 10px 12px;
+    margin: 0.7em -2px;          /* slight negative margin to use full width */
+    border-radius: 5px;
+    /* nudge iOS to show scrollbar */
+    scrollbar-width: thin;
+  }
+  pre::-webkit-scrollbar { height: 6px; }
+  pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Inline code: allow soft break to prevent horizontal page scroll */
+  p code, li code, td code {
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+
+  /* Tables: smaller, scroll horizontally without breaking page layout */
+  main table {
+    font-size: 0.82rem;
+    margin: 0.8em -2px;
+  }
+  main th, main td { padding: 5px 8px; }
+
+  /* Larger touch targets on link lists */
+  ul.concepts li a {
+    padding: 14px 6px;
+    min-height: 44px;
+  }
+  ul.concepts li small {
+    font-size: 0.82rem;
+    margin-top: 3px;
+  }
+
+  /* Section headings */
+  .section h2 {
+    font-size: 0.78rem;
+    padding-bottom: 3px;
+  }
+  .section.featured {
+    padding: 6px 10px 4px;
+  }
+
+  /* A-Z grid: single column on mobile, comfortable tap targets */
+  .az-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+  .az-grid li {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 0 !important;
+  }
+  .az-grid li a { font-size: 0.95rem !important; }
+
+  /* Blockquotes */
+  blockquote {
+    margin: 0.7em 0;
+    padding: 0.15em 0.7em;
+  }
+
+  /* Section count badge */
+  .section h2 .count { font-size: 0.7rem; }
+}
+
+/* Very narrow screens (≤360px, e.g. iPhone SE) — squeeze further */
+@media (max-width: 360px) {
+  main { padding: 10px 10px 60px; }
+  pre { font-size: 12.5px; padding: 9px 10px; }
+  h1 { font-size: 1.25rem; }
 }
