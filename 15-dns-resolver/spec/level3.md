@@ -1,48 +1,25 @@
-# Level 3 — Missing glue records
+# Level 3 — Step 3: Missing glue records
 
-## New behavior
+> Verbatim from the assessment.
 
-Sometimes a server delegates to a nameserver but **doesn't include the nameserver's IP** in `additional`:
+Sometimes we are directed to a nameserver whose IP isn't in the `additional` section. When there is no matching glue record, you must **resolve the nameserver's IP address** before continuing.
+
+For example, when we try to resolve `api.anthropic.com`:
 
 ```
-send_query("api.anthropic.com.", server) →
-  DNSResponse(
-      status='NOERROR', answer=None,
-      authority=[DNSRecord(name='api.anthropic.com.', rdtype='NS', rdata='gemma.ns.cloudflare.com.')],
-      additional=[],   # no glue!
-  )
+DNSResponse(
+    status="NOERROR",
+    answer=None,
+    authority=[DNSRecord(name="api.anthropic.com.", rdtype="NS",
+                         rdata="gemma.ns.cloudflare.com.")],
+    additional=[]
+)
 ```
 
-You can't query `gemma.ns.cloudflare.com.` directly — that's a name, not an IP. So you must **resolve the nameserver's name first, starting from the root**, then continue resolving the original name with the IP you just looked up.
+The `authority` says to ask `gemma.ns.cloudflare.com.`, but `additional` is empty — this server doesn't know the IP for `gemma.ns.cloudflare.com.`. So we need to resolve `gemma.ns.cloudflare.com.` first (starting from the root server, just like any other resolution) to get its IP, then continue resolving `api.anthropic.com`.
 
-## The recursive shape
+For this step, still assume there is exactly one `NS` record in `authority`.
 
-```python
-# inside your delegation walk, when you need to follow the NS:
-ns_name = authority[0].rdata
-glue = first A record in additional where name == ns_name, else None
-if glue is not None:
-    next_server = glue.rdata
-else:
-    next_server = resolve(ns_name)   # recursively resolve the NS
-    if next_server is None:
-        return None                   # can't continue
 ```
-
-Yes, you call your own `resolve()` recursively. That's expected.
-
-## Stay assuming
-
-- Still `status='NOERROR'` only.
-- Still exactly one `NS` per `authority`.
-
-## Don't worry about
-
-- Multiple NS records — Level 4.
-- Cycles in glue lookups (zone A's NS lives in zone B and vice versa) — Level 5.
-
-## Run
-
-```bash
-python3 test_level3.py
+./test.sh 3
 ```

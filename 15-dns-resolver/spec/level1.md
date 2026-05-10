@@ -1,102 +1,98 @@
-# Level 1 — Basic delegation (root → TLD → authoritative)
+# Level 1 — Step 0 (Normalize) + Step 1 (Annotated Example)
 
-## What you're building
+> Verbatim from the assessment. Combined here because passing Step 1 tests requires `normalize()` from Step 0.
 
-You're writing a recursive DNS resolver in pure Python. Given a domain name like `Anthropic.COM`, you walk down from the root server (`ROOT_SERVER`) following NS delegations until some server gives you a direct `A` answer record, and you return its `rdata` (the IP).
+## Step 0 - Normalize
 
-For Level 1 we keep it as simple as possible:
-
-- Every response has `status='NOERROR'`.
-- Each `authority` list has **exactly one** `NS` record.
-- The matching glue (`A` record) for that NS is **always** in the same response's `additional` section.
-- Direct answers, when they come, are always type `A` (no `CNAME` until Level 2).
-
-## Two functions to implement
-
-```python
-def normalize(name: str) -> str:
-    """Lowercase + ensure trailing dot. 'Anthropic.COM' -> 'anthropic.com.'"""
-
-def resolve(domain_name: str, max_queries: int = 15) -> str | None:
-    """Recursively resolve domain_name to an IP, starting at ROOT_SERVER.
-
-    Returns the IP string, or None if it can't be resolved.
-    max_queries is unused until Level 5.
-    """
-```
-
-## The annotated walk-through
-
-Suppose you call `resolve("Anthropic.COM")`. After normalizing to `"anthropic.com."`, you start at `ROOT_SERVER`:
+In DNS, names are case insensitive, and by convention always end in a trailing dot. For example, `"Anthropic.COM"` normalizes to `"anthropic.com."`.
 
 ```
-send_query("anthropic.com.", ROOT_SERVER) →
-  DNSResponse(
-      status='NOERROR',
-      answer=None,
-      authority=[DNSRecord(name='com.', rdtype='NS', rdata='a.gtld-servers.net.')],
-      additional=[DNSRecord(name='a.gtld-servers.net.', rdtype='A',    rdata='192.5.6.30'),
-                  DNSRecord(name='a.gtld-servers.net.', rdtype='AAAA', rdata='2001:db8::1')],
-  )
+>>> normalize("Anthropic.COM")
+'anthropic.com.'
+>>> normalize("Docs.Anthropic.Com")
+'docs.anthropic.com.'
+>>> normalize("ANTHROPIC.COM")
+'anthropic.com.'
 ```
 
-Root says "I don't know, ask `a.gtld-servers.net.` which is at `192.5.6.30`". The IPv4 glue is the `A` record in `additional` — **ignore the `AAAA` IPv6 record**. So the next step:
+Implement `normalize()` in `dns_exercise.py`. You can run all Step 0 tests with:
 
 ```
-send_query("anthropic.com.", "192.5.6.30") →
-  DNSResponse(
-      status='NOERROR', answer=None,
-      authority=[DNSRecord(name='anthropic.com.', rdtype='NS', rdata='isla.ns.cloudflare.com.')],
-      additional=[DNSRecord(name='isla.ns.cloudflare.com.', rdtype='A', rdata='108.162.192.119')],
-  )
+./test.sh 0
 ```
 
-TLD delegates to Cloudflare. Continue:
+You can read the tests in `tests/test_dns.py` and you can run an individual test with `pytest -k test_function_name`. For example:
 
 ```
-send_query("anthropic.com.", "108.162.192.119") →
-  DNSResponse(
-      status='NOERROR',
-      answer=DNSRecord(name='anthropic.com.', rdtype='A', rdata='160.79.104.10'),
-      authority=[], additional=[],
-  )
+pytest -k test_normalize_trailing_dot
 ```
 
-Got an `A` answer. Return `'160.79.104.10'`.
+## Step 1 - Annotated Example
 
-## The algorithm
+For concreteness, we'll start with an annotated example and show the actual responses to help you get a feel for how DNS works.
+
+Suppose you type `"Anthropic.COM"` into your web browser. With your `normalize()` function, the normalized name is `anthropic.com.`.
+
+We've provided a function `send_query(normalized_name, server_ip)` that simulates the network call to `server_ip` and the IP address of a "root server" which is the starting point of any DNS query.
+
+`send_query("anthropic.com.", ROOT_SERVER)` returns:
 
 ```
-next_server = ROOT_SERVER
-while True:
-    response = send_query(normalized_name, next_server)
-    if response.answer is not None and response.answer.rdtype == 'A':
-        return response.answer.rdata
-    # Find the (one) glue A record in additional and use it as the next server.
-    ns_name = response.authority[0].rdata
-    next_server = the rdata of the additional record where rdtype=='A' and name==ns_name
+DNSResponse(
+    status="NOERROR",
+    answer=None,
+    authority=[DNSRecord(name="com.", rdtype="NS",
+                         rdata="a.gtld-servers.net.")],
+    additional=[DNSRecord(name="a.gtld-servers.net.", rdtype="AAAA",
+                          rdata="2001:db8::1"),
+                DNSRecord(name="a.gtld-servers.net.", rdtype="A",
+                          rdata="192.5.6.30")]
+)
 ```
 
-## Provided helpers
+The root server query succeeded with `NOERROR`, but `answer` is `None` — it doesn't know the IP address. But it does know another server who can help us! The `NS` type record says that the server named `a.gtld-servers.net.` knows more about `com.` names.
 
-- `from dns_mock import send_query, ROOT_SERVER, install_scenario`
-- `from dns_types import DNSResponse, DNSRecord`
+But `send_query` needs an IP address — what is the IP for `a.gtld-servers.net.`? Helpfully, this response contains "glue records" in the `additional` field. We need the one with `rdtype="A"` — that's the IPv4 address. (The `AAAA` record is IPv6, which we'll ignore.)
 
-`send_query` raises `ValueError` if you pass a name that isn't lowercase with a trailing dot, so `normalize()` first.
+For now we'll assume there is only one `NS` record in `authority`, and that the name in `rdata` has exactly one matching glue record. So the next step on our journey is to ask `192.5.6.30`:
 
-## Don't worry about (yet)
+`send_query("anthropic.com.", "192.5.6.30")` returns:
 
-- `CNAME` answers — Level 2
-- Empty `additional` — Level 3
-- `NXDOMAIN` / `REFUSED` — Level 4
-- Cycles or infinite loops — Level 5
-- Multiple domains — Level 6
-- Concurrency — Level 7
-
-If a test gives you `status='NOERROR'` and you get stuck, just assume the spec for this level holds (one NS, one matching glue, A answer eventually).
-
-## Run
-
-```bash
-python3 test_level1.py
 ```
+DNSResponse(
+    status="NOERROR",
+    answer=None,
+    authority=[DNSRecord(name="anthropic.com.", rdtype="NS",
+                         rdata="isla.ns.cloudflare.com.")],
+    additional=[DNSRecord(name="isla.ns.cloudflare.com.", rdtype="AAAA",
+                          rdata="2001:db8::1"),
+                DNSRecord(name="isla.ns.cloudflare.com.", rdtype="A",
+                          rdata="108.162.192.119")]
+)
+```
+
+Exactly as before, this server doesn't know the IP address we're looking for, but again it can point us in the right direction.
+
+`send_query("anthropic.com.", "108.162.192.119")` returns:
+
+```
+DNSResponse(
+    status="NOERROR",
+    answer=DNSRecord(name="anthropic.com.", rdtype="A",
+                     rdata="160.79.104.10"),
+    authority=[],
+    additional=[]
+)
+```
+
+Finally, our long journey is over. The `answer` field holds a type `A` record (remember, `A` means "my rdata field holds the IP for this name"), and we return its `rdata`.
+
+Now implement `resolve()` in `dns_exercise.py` so that the provided unit tests pass for Step 1. Test Step 1 from Terminal with:
+
+```
+./test.sh 1
+```
+
+Don't worry about handling any cases not covered by the tests; we'll get to those in future steps. For now, assume every query returns `status="NOERROR"`. Feel free to define additional helper functions.
+
+If you get a status of `NXDOMAIN`, this means "the name you asked for definitely doesn't exist". Check your normalization.

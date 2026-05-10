@@ -1,49 +1,27 @@
-# Level 2 — CNAME records
+# Level 2 — Step 2: CNAME records
 
-## New behavior
+> Verbatim from the assessment.
 
-Some servers, instead of returning an `A` answer, return a `CNAME` answer:
+Sometimes, instead of containing an `A` record, the `answer` section will contain a `CNAME` record.
+
+For example, when resolving `www.example.com`, the authoritative server returns:
 
 ```
-send_query("www.example.com.", server) →
-  DNSResponse(
-      status='NOERROR',
-      answer=DNSRecord(name='www.example.com.', rdtype='CNAME', rdata='example.com.'),
-      authority=[], additional=[],
-  )
+DNSResponse(
+    status="NOERROR",
+    answer=DNSRecord(name="www.example.com.", rdtype="CNAME",
+                     rdata="example.com."),
+    authority=[],
+    additional=[]
+)
 ```
 
-A `CNAME` is an alias. To finish the resolution, **start the entire process over from the root server**, but using the alias name (`example.com.`) instead of the original (`www.example.com.`).
+This means we have to start the process over from the root server, but instead of looking for `www.example.com`, we're now looking for a different name stored in this `rdata` field: `example.com.`.
 
-Chains can be multi-hop: `store.example.com.` may CNAME to `shop.fastcdn.net.`, which CNAMEs to `cdn.fastcdn.net.`, which finally has an `A` record.
+`CNAME` chains can be longer than one hop. For example, `store.example.com` aliases to `shop.fastcdn.net`, which itself aliases to `cdn.fastcdn.net`, which finally has an `A` record.
 
-## What changes
+Add handling for this case to `resolve()` and test your code with:
 
-Wrap your Level 1 walk in an outer loop that handles the CNAME-restart case. A clean shape:
-
-```python
-current = normalize(domain_name)
-while True:
-    answer = walk_from_root(current)   # your Level 1 logic, returning the answer record (not just rdata)
-    if answer is None:
-        return None
-    if answer.rdtype == 'A':
-        return answer.rdata
-    if answer.rdtype == 'CNAME':
-        current = answer.rdata          # restart from root with the new name
 ```
-
-## Stay assuming
-
-- Every response is `status='NOERROR'`.
-- Each `authority` has exactly one NS, with matching glue in `additional`.
-
-## Don't worry about
-
-- Cycles in CNAME chains (e.g. A → B → A) — Level 5 catches this via `max_queries`.
-
-## Run
-
-```bash
-python3 test_level2.py
+./test.sh 2
 ```
