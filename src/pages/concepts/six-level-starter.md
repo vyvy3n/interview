@@ -397,12 +397,12 @@ Never end with broken code in the editor when you had passing code 10 minutes ag
 
 | Problem | Concurrency | Patterns it exercises |
 |---|---|---|
-| [09 Task Scheduler](https://github.com/vyvy3n/interview/tree/main/09-concurrent-task-scheduler) | threading | workers (§6b), wait-for (§7c), DAG cycle detection |
-| [10 KV Store](https://github.com/vyvy3n/interview/tree/main/10-thread-safe-keyvalue) | asyncio | TTL (§4a), LRU, CAS (§7a), aincrement |
-| [11 Bank](https://github.com/vyvy3n/interview/tree/main/11-bank-account-system) | threading | schedule+tick (§4c), merge (§5a), batch (§7b), Condition |
-| [12 File Cache](https://github.com/vyvy3n/interview/tree/main/12-file-cache-multitenant) | asyncio | LRU + multi-tenant, atomic batch + bulk, lazy lock init |
-| [13 LLM Conv Service](https://github.com/vyvy3n/interview/tree/main/13-llm-conversation-service) | threading | fork (§5b), worker queue, batch (§7b) |
-| [14 LLM API Gateway](https://github.com/vyvy3n/interview/tree/main/14-llm-api-gateway) | asyncio | refill (§4b), prompt cache, atomic batch + merge + CAS |
+| [09 Task Scheduler](https://github.com/vyvy3n/interview/blob/main/09-concurrent-task-scheduler/solution.py) | threading | workers (§6b), wait-for (§7c), DAG cycle detection |
+| [10 KV Store](https://github.com/vyvy3n/interview/blob/main/10-thread-safe-keyvalue/solution.py) | asyncio | TTL (§4a), LRU, CAS (§7a), aincrement |
+| [11 Bank](https://github.com/vyvy3n/interview/blob/main/11-bank-account-system/solution.py) | threading | schedule+tick (§4c), merge (§5a), batch (§7b), Condition |
+| [12 File Cache](https://github.com/vyvy3n/interview/blob/main/12-file-cache-multitenant/solution.py) | asyncio | LRU + multi-tenant, atomic batch + bulk, lazy lock init |
+| [13 LLM Conv Service](https://github.com/vyvy3n/interview/blob/main/13-llm-conversation-service/solution.py) | threading | fork (§5b), worker queue, batch (§7b) |
+| [14 LLM API Gateway](https://github.com/vyvy3n/interview/blob/main/14-llm-api-gateway/solution.py) | asyncio | refill (§4b), prompt cache, atomic batch + merge + CAS |
 
 ---
 

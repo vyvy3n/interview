@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-const GH = 'https://github.com/vyvy3n/interview/tree/main';
+const GH = 'https://github.com/vyvy3n/interview/blob/main';
 
 // Mock practice problems — pinned at the very top for quick mobile access.
 // Tap a chip to open the problem's README + spec + solution on GitHub.
@@ -171,7 +171,7 @@ const totalConcepts = allItems.length;
     <ul class="problems-grid">
       {sixLevelProblems.map(p => (
         <li>
-          <a href={`${GH}/${p.dir}`} target="_blank" rel="noopener" class="chip chip-six">
+          <a href={`${GH}/${p.dir}/solution.py`} target="_blank" rel="noopener" class="chip chip-six">
             <span class="chip-num">{p.num}</span>
             <span class="chip-title">{p.title}</span>
             <span class="chip-tag">{p.tag}</span>
@@ -184,7 +184,7 @@ const totalConcepts = allItems.length;
     <ul class="problems-grid">
       {fourLevelProblems.map(p => (
         <li>
-          <a href={`${GH}/${p.dir}`} target="_blank" rel="noopener" class="chip">
+          <a href={`${GH}/${p.dir}/solution.py`} target="_blank" rel="noopener" class="chip">
             <span class="chip-num">{p.num}</span>
             <span class="chip-title">{p.title}</span>
             <span class="chip-tag">{p.tag}</span>
