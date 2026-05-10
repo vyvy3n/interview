@@ -1,6 +1,30 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
+const GH = 'https://github.com/vyvy3n/interview/tree/main';
+
+// Mock practice problems — pinned at the very top for quick mobile access.
+// Tap a chip to open the problem's README + spec + solution on GitHub.
+const sixLevelProblems = [
+  { num: '09', title: 'Task Scheduler',     dir: '09-concurrent-task-scheduler', tag: 'threading' },
+  { num: '10', title: 'KV Store',           dir: '10-thread-safe-keyvalue',      tag: 'asyncio'   },
+  { num: '11', title: 'Bank Account',       dir: '11-bank-account-system',       tag: 'threading' },
+  { num: '12', title: 'File Cache Multi',   dir: '12-file-cache-multitenant',    tag: 'asyncio'   },
+  { num: '13', title: 'LLM Conv Service',   dir: '13-llm-conversation-service',  tag: 'threading' },
+  { num: '14', title: 'LLM API Gateway',    dir: '14-llm-api-gateway',           tag: 'asyncio'   },
+];
+
+const fourLevelProblems = [
+  { num: '01', title: 'Bank Transactions',  dir: '01-bank-transactions',         tag: 'finance'  },
+  { num: '02', title: 'In-Memory DB',       dir: '02-in-memory-db',              tag: 'KV+TTL'   },
+  { num: '03', title: 'File System',        dir: '03-file-system',               tag: 'files'    },
+  { num: '04', title: 'Cloud Storage',      dir: '04-cloud-storage',             tag: 'sharing'  },
+  { num: '05', title: 'LLM Router',         dir: '05-llm-request-router',        tag: 'GPU'      },
+  { num: '06', title: 'LLM Cache',          dir: '06-llm-prompt-cache',          tag: 'TTL+LRU'  },
+  { num: '07', title: 'LLM Rate Limiter',   dir: '07-llm-rate-limiter',          tag: 'tokens'   },
+  { num: '08', title: 'LLM Conv Manager',   dir: '08-llm-conversation-manager',  tag: 'context'  },
+];
+
 // Pinned curated path for the immediate Anthropic Fellows assessment.
 // Items here also appear in the topical sections below — this is a navigation
 // shortcut, not separate content.
@@ -131,6 +155,39 @@ const totalConcepts = allItems.length;
     <a href="#az-index">A–Z index</a>.
   </p>
 
+  <div class="section problems-section">
+    <h2>Mock problems <span class="count">(14 in repo)</span></h2>
+    <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
+      tap a chip → opens the problem's spec + solution on GitHub
+    </p>
+
+    <div class="problems-subhead">6-level (matches actual test) — threading + asyncio</div>
+    <ul class="problems-grid">
+      {sixLevelProblems.map(p => (
+        <li>
+          <a href={`${GH}/${p.dir}`} target="_blank" rel="noopener" class="chip chip-six">
+            <span class="chip-num">{p.num}</span>
+            <span class="chip-title">{p.title}</span>
+            <span class="chip-tag">{p.tag}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="problems-subhead">4-level (warmup)</div>
+    <ul class="problems-grid">
+      {fourLevelProblems.map(p => (
+        <li>
+          <a href={`${GH}/${p.dir}`} target="_blank" rel="noopener" class="chip">
+            <span class="chip-num">{p.num}</span>
+            <span class="chip-title">{p.title}</span>
+            <span class="chip-tag">{p.tag}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+
   <div class="section featured">
     <h2>🎯 Anthropic Fellows — prep path</h2>
     <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
@@ -179,6 +236,69 @@ const totalConcepts = allItems.length;
 </Layout>
 
 <style>
+  .problems-section { margin: 1rem 0 1.5rem; }
+  .problems-subhead {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 8px 0 4px;
+  }
+  .problems-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 6px;
+  }
+  .problems-grid li { border: none; padding: 0; }
+  .problems-grid .chip {
+    display: block;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--fg);
+    line-height: 1.25;
+    background: var(--bg);
+  }
+  .problems-grid .chip:hover,
+  .problems-grid .chip:active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .problems-grid .chip-six {
+    border-color: var(--accent);
+    border-width: 1px;
+  }
+  .problems-grid .chip-num {
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin-right: 5px;
+  }
+  .problems-grid .chip-title {
+    font-weight: 500;
+    font-size: 0.84rem;
+  }
+  .problems-grid .chip-tag {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 3px;
+    text-transform: lowercase;
+  }
+  @media (max-width: 640px) {
+    .problems-grid { grid-template-columns: repeat(2, 1fr); gap: 5px; }
+    .problems-grid .chip { padding: 7px 8px; min-height: 54px; }
+    .problems-grid .chip-num { font-size: 0.7rem; margin-right: 4px; }
+    .problems-grid .chip-title { font-size: 0.78rem; }
+    .problems-grid .chip-tag { font-size: 0.64rem; margin-top: 2px; }
+    .problems-subhead { font-size: 0.66rem; margin: 6px 0 3px; }
+  }
+
   .section.featured {
     border: 1px solid var(--accent);
     border-radius: 8px;
