@@ -8,9 +8,6 @@ You implement ONE function: solution(queries).
 
 Read spec/level1.md for the full spec and a worked example.
 
-The skeleton below has the loop set up for you. You fill in the branch
-bodies for each level. Delete the NotImplementedError once you start.
-
 Level 1: REGISTER_GPU, ROUTE_REQUEST, COMPLETE_REQUEST   — see spec/level1.md
 Level 2: GPU_LOAD, TOP_BUSIEST                           — see spec/level2.md
 Level 3: ROUTE_REQUEST_WITH_PREFIX, GET_CACHED_PREFIXES  — see spec/level3.md
@@ -21,7 +18,7 @@ from collections import OrderedDict
 
 
 # ---------------------------------------------------------------------------
-# Data structures — extend as you progress through levels
+# Data structures
 # ---------------------------------------------------------------------------
 
 class GPU:
@@ -31,8 +28,9 @@ class GPU:
         self.gpu_id = gpu_id
         self.capacity = capacity          # original capacity; restored on RECOVER
         self.active = 0                   # current in-flight request count
-        # Level 3: per-GPU LRU prefix cache (max 5 entries).
-        # Use an OrderedDict: key=prefix, value=None; MRU at the end (move_to_end).
+        # Per-GPU LRU prefix cache (max 5 entries).
+        # OrderedDict: key=prefix, value=None; MRU at the END (move_to_end pushes to back).
+        # popitem(last=False) evicts the front = LRU.
         self.prefix_cache: OrderedDict = OrderedDict()
 
     def has_capacity(self) -> bool:
@@ -41,15 +39,20 @@ class GPU:
     def add_prefix(self, prefix: str) -> None:
         """Insert or refresh prefix in LRU cache; evict LRU if over limit."""
         if prefix in self.prefix_cache:
-            self.prefix_cache.move_to_end(prefix)   # refresh → MRU
+            self.prefix_cache.move_to_end(prefix)   # refresh → MRU (back)
         else:
             self.prefix_cache[prefix] = None
             if len(self.prefix_cache) > 5:
                 self.prefix_cache.popitem(last=False)  # evict LRU (front)
 
     def cached_prefixes_mru_first(self) -> list:
-        """Return prefixes ordered most-recently-used first."""
+        """Return prefixes ordered most-recently-used first (back of OrderedDict is MRU)."""
         return list(reversed(self.prefix_cache.keys()))
+
+    def reset(self) -> None:
+        """Reset state for recovery: zero active, empty cache."""
+        self.active = 0
+        self.prefix_cache = OrderedDict()
 
 
 class Request:
@@ -63,7 +66,7 @@ class Request:
 
 
 # ---------------------------------------------------------------------------
-# Routing helpers — implement once, reuse across levels
+# Routing helpers
 # ---------------------------------------------------------------------------
 
 def _least_loaded_available(gpus: dict) -> "GPU | None":
@@ -72,10 +75,10 @@ def _least_loaded_available(gpus: dict) -> "GPU | None":
     Ties broken by gpu_id alphabetically ascending.
     Returns None if no GPU is available.
     """
-    # TODO: implement — iterate gpus.values(), filter has_capacity(), sort by (active, gpu_id)
-    raise NotImplementedError(
-        "_least_loaded_available — implement me (used by ROUTE_REQUEST and as fallback in L3/L4)"
-    )
+    candidates = [g for g in gpus.values() if g.has_capacity()]
+    if not candidates:
+        return None
+    return min(candidates, key=lambda g: (g.active, g.gpu_id))
 
 
 def _route_with_prefix(gpus: dict, prefix: str) -> "GPU | None":
@@ -85,10 +88,15 @@ def _route_with_prefix(gpus: dict, prefix: str) -> "GPU | None":
       2. Fallback: _least_loaded_available(gpus).
     Returns None if no GPU has capacity at all.
     """
-    # TODO: implement — see spec/level3.md routing logic
-    raise NotImplementedError(
-        "_route_with_prefix — implement me (used by ROUTE_REQUEST_WITH_PREFIX and FAIL_GPU re-routing)"
-    )
+    # Step 1: prefix-hit candidates (have prefix cached AND have capacity)
+    hit_candidates = [
+        g for g in gpus.values()
+        if prefix in g.prefix_cache and g.has_capacity()
+    ]
+    if hit_candidates:
+        return min(hit_candidates, key=lambda g: (g.active, g.gpu_id))
+    # Step 2: fallback to least-loaded
+    return _least_loaded_available(gpus)
 
 
 # ---------------------------------------------------------------------------
@@ -97,8 +105,8 @@ def _route_with_prefix(gpus: dict, prefix: str) -> "GPU | None":
 
 def solution(queries: list[list[str]]) -> list[str]:
     # --- state ---
-    gpus: dict[str, GPU] = {}        # gpu_id → GPU (active GPUs only)
-    failed_gpus: dict[str, GPU] = {} # gpu_id → GPU (failed; only capacity preserved)
+    gpus: dict[str, GPU] = {}         # gpu_id → GPU (active GPUs only)
+    failed_gpus: dict[str, GPU] = {}  # gpu_id → GPU (failed; capacity preserved for recovery)
     requests: dict[str, Request] = {} # request_id → Request
 
     out = []
@@ -111,93 +119,142 @@ def solution(queries: list[list[str]]) -> list[str]:
         # ------------------------------------------------------------------ #
 
         if op == "REGISTER_GPU":
-            # q is ["REGISTER_GPU", <ts>, <gpu_id>, <capacity>]
+            # ["REGISTER_GPU", <ts>, <gpu_id>, <capacity>]
             _, ts, gpu_id, capacity = q
-            # TODO: register gpu_id with int(capacity).
-            #       Return "true" if new, "false" if already exists.
-            raise NotImplementedError("REGISTER_GPU — see spec/level1.md")
+            if gpu_id in gpus or gpu_id in failed_gpus:
+                out.append("false")
+            else:
+                gpus[gpu_id] = GPU(gpu_id, int(capacity))
+                out.append("true")
 
         elif op == "ROUTE_REQUEST":
-            # q is ["ROUTE_REQUEST", <ts>, <request_id>, <token_count>]
+            # ["ROUTE_REQUEST", <ts>, <request_id>, <token_count>]
             _, ts, request_id, token_count = q
-            # TODO: assign request to least-loaded GPU with spare capacity.
-            #       Store Request(request_id, gpu_id, int(token_count), prefix=None).
-            #       Return gpu_id or "" if no capacity / no GPUs.
-            raise NotImplementedError("ROUTE_REQUEST — see spec/level1.md")
+            gpu = _least_loaded_available(gpus)
+            if gpu is None:
+                out.append("")
+            else:
+                gpu.active += 1
+                requests[request_id] = Request(request_id, gpu.gpu_id, int(token_count), prefix=None)
+                out.append(gpu.gpu_id)
 
         elif op == "COMPLETE_REQUEST":
-            # q is ["COMPLETE_REQUEST", <ts>, <request_id>]
+            # ["COMPLETE_REQUEST", <ts>, <request_id>]
             _, ts, request_id = q
-            # TODO: look up request_id in requests dict.
-            #       Decrement active on the GPU it was on, remove from requests.
-            #       Return "true" if found, "false" if unknown.
-            raise NotImplementedError("COMPLETE_REQUEST — see spec/level1.md")
+            if request_id not in requests:
+                out.append("false")
+            else:
+                req = requests.pop(request_id)
+                # Decrement active on the GPU (may have been re-routed; use current gpu_id)
+                if req.gpu_id in gpus:
+                    gpus[req.gpu_id].active -= 1
+                out.append("true")
 
         # ------------------------------------------------------------------ #
         # Level 2
         # ------------------------------------------------------------------ #
 
         elif op == "GPU_LOAD":
-            # q is ["GPU_LOAD", <ts>, <gpu_id>]
+            # ["GPU_LOAD", <ts>, <gpu_id>]
             _, ts, gpu_id = q
-            # TODO: return "active/capacity" for gpu_id, or "" if not registered.
-            raise NotImplementedError("GPU_LOAD — see spec/level2.md")
+            if gpu_id not in gpus:
+                out.append("")
+            else:
+                g = gpus[gpu_id]
+                out.append(f"{g.active}/{g.capacity}")
 
         elif op == "TOP_BUSIEST":
-            # q is ["TOP_BUSIEST", <ts>, <k>]
+            # ["TOP_BUSIEST", <ts>, <k>]
             _, ts, k = q
-            # TODO: sort active GPUs by (-active, gpu_id); take top int(k).
-            #       Format each as "gpu_id(active/capacity)"; join with ", ".
-            #       Return "" if no GPUs registered.
-            raise NotImplementedError("TOP_BUSIEST — see spec/level2.md")
+            if not gpus:
+                out.append("")
+            else:
+                k = int(k)
+                # Sort descending by active, then ascending by gpu_id for ties
+                ranked = sorted(gpus.values(), key=lambda g: (-g.active, g.gpu_id))
+                top = ranked[:k]
+                out.append(", ".join(f"{g.gpu_id}({g.active}/{g.capacity})" for g in top))
 
         # ------------------------------------------------------------------ #
         # Level 3
         # ------------------------------------------------------------------ #
 
         elif op == "ROUTE_REQUEST_WITH_PREFIX":
-            # q is ["ROUTE_REQUEST_WITH_PREFIX", <ts>, <request_id>, <prefix>, <token_count>]
+            # ["ROUTE_REQUEST_WITH_PREFIX", <ts>, <request_id>, <prefix>, <token_count>]
             _, ts, request_id, prefix, token_count = q
-            # TODO: call _route_with_prefix(gpus, prefix) to pick best GPU.
-            #       On success: increment GPU active, call gpu.add_prefix(prefix),
-            #       store Request(request_id, gpu_id, int(token_count), prefix=prefix).
-            #       Return gpu_id or "" if no GPU has capacity.
-            raise NotImplementedError("ROUTE_REQUEST_WITH_PREFIX — see spec/level3.md")
+            gpu = _route_with_prefix(gpus, prefix)
+            if gpu is None:
+                out.append("")
+            else:
+                gpu.active += 1
+                gpu.add_prefix(prefix)
+                requests[request_id] = Request(request_id, gpu.gpu_id, int(token_count), prefix=prefix)
+                out.append(gpu.gpu_id)
 
         elif op == "GET_CACHED_PREFIXES":
-            # q is ["GET_CACHED_PREFIXES", <ts>, <gpu_id>]
+            # ["GET_CACHED_PREFIXES", <ts>, <gpu_id>]
             _, ts, gpu_id = q
-            # TODO: return gpu.cached_prefixes_mru_first() joined by ", ".
-            #       Return "" if GPU missing or cache is empty.
-            raise NotImplementedError("GET_CACHED_PREFIXES — see spec/level3.md")
+            if gpu_id not in gpus:
+                out.append("")
+            else:
+                prefixes = gpus[gpu_id].cached_prefixes_mru_first()
+                out.append(", ".join(prefixes) if prefixes else "")
 
         # ------------------------------------------------------------------ #
         # Level 4
         # ------------------------------------------------------------------ #
 
         elif op == "FAIL_GPU":
-            # q is ["FAIL_GPU", <ts>, <gpu_id>]
+            # ["FAIL_GPU", <ts>, <gpu_id>]
             _, ts, gpu_id = q
-            # TODO:
-            #   1. Return "" if gpu_id not in gpus (unknown or already failed).
-            #   2. Collect all Request objects whose gpu_id == gpu_id; sort by request_id alpha ASC.
-            #   3. Remove the failed GPU from gpus, wipe its cache, move to failed_gpus.
-            #   4. For each collected request (sorted):
-            #      a. If request.prefix is not None: use _route_with_prefix on remaining gpus.
-            #      b. If request.prefix is None: use _least_loaded_available on remaining gpus.
-            #      c. On success: increment new GPU active, update cache if prefix exists,
-            #         update request.gpu_id to new GPU id.
-            #      d. On failure (None returned): remove request from requests dict (drop silently).
-            #   5. Return count of successfully re-routed requests as a string.
-            raise NotImplementedError("FAIL_GPU — see spec/level4.md")
+            if gpu_id not in gpus:
+                # Unknown or already failed
+                out.append("")
+                continue
+
+            failing_gpu = gpus.pop(gpu_id)
+
+            # Collect all in-flight requests on this GPU, sorted alphabetically
+            inflight = sorted(
+                [req for req in requests.values() if req.gpu_id == gpu_id],
+                key=lambda r: r.request_id
+            )
+
+            # Reset the GPU and move to failed state
+            failing_gpu.reset()
+            failed_gpus[gpu_id] = failing_gpu
+
+            # Re-route each request (gpus dict no longer has the failed GPU)
+            success_count = 0
+            for req in inflight:
+                if req.prefix is not None:
+                    new_gpu = _route_with_prefix(gpus, req.prefix)
+                else:
+                    new_gpu = _least_loaded_available(gpus)
+
+                if new_gpu is None:
+                    # No capacity — drop the request
+                    del requests[req.request_id]
+                else:
+                    new_gpu.active += 1
+                    if req.prefix is not None:
+                        new_gpu.add_prefix(req.prefix)
+                    req.gpu_id = new_gpu.gpu_id
+                    success_count += 1
+
+            out.append(str(success_count))
 
         elif op == "RECOVER_GPU":
-            # q is ["RECOVER_GPU", <ts>, <gpu_id>]
+            # ["RECOVER_GPU", <ts>, <gpu_id>]
             _, ts, gpu_id = q
-            # TODO: if gpu_id in failed_gpus: move back to gpus with active=0, empty cache.
-            #       Return "true".
-            #       Otherwise (active or never registered): return "false".
-            raise NotImplementedError("RECOVER_GPU — see spec/level4.md")
+            if gpu_id in failed_gpus:
+                gpu = failed_gpus.pop(gpu_id)
+                gpu.reset()  # active=0, empty cache, capacity unchanged
+                gpus[gpu_id] = gpu
+                out.append("true")
+            else:
+                # Active GPU or never registered → false
+                out.append("false")
 
         else:
             raise ValueError(f"Unknown op: {op}")
