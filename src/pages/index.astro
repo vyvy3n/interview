@@ -489,6 +489,20 @@ const totalConcepts = allItems.length;
       <p class="dbg-sub">After merges, tokens are still <em>strings</em> — one never seen in
         the vocab <code>KeyError</code>s on <code>d[tok]</code>. The spec names the default
         (<code>unk_id</code>). mock-2 / mock-4 <code>encode()</code>.</p>
+      <h3>BPE / tokenizer — what to check</h3>
+      <ul class="tight">
+        <li><strong>Vocab layout:</strong> specials first (id 0, 1), then learned tokens —
+          <code>vocab_size</code> is the TOTAL, so slice learned tokens with
+          <code>vocab_size - num_special</code>.</li>
+        <li><strong>Special ids:</strong> <code>unk_id</code> / <code>pad_id</code> are
+          same-typed ints — trivially swapped in positional construction (build by keyword).</li>
+        <li><strong>Merge loop:</strong> re-scan from the start after each merge, and cover
+          the LAST adjacent pair — <code>range(len-1)</code>, not <code>len-2</code>.</li>
+        <li><strong>encode:</strong> merged tokens are strings —
+          <code>token_to_id.get(tok, unk_id)</code>, never <code>[tok]</code>.</li>
+        <li><strong>Counts:</strong> <code>np.bincount(ids, minlength=vocab_size)</code>.</li>
+        <li><strong>Ratios:</strong> chars-per-token is a float — <code>/</code>, not <code>//</code>.</li>
+      </ul>
       <a href="#top" class="to-top">↑ top</a>
     </div>
 
