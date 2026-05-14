@@ -33,7 +33,8 @@ np.bincount(ids, minlength=len(vocab.tokens))
 
 # Alternative — pre-allocate, so the length is correct by construction:
 counts = np.zeros(len(vocab.tokens), dtype=int)
-np.add.at(counts, ids, 1)            # unbuffered in-place add; handles repeats`;
+np.add.at(counts, ids, 1)            # for each index i in ids: counts[i] += 1, in place
+                                     # (unbuffered — repeated ids each count correctly)`;
 
 const broadcastSnippet = `m = np.array([[10, 10], [20, 20], [30, 30]])   # shape (3, 2)
 
