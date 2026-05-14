@@ -20,5 +20,6 @@ __pycache__
 practice-general-coding-ability/15-dns-resolver/solution.py
 practice-general-coding-ability/15-dns-resolver/solution_independent.py
 
-# Debugging-mock answer keys — kept local, not checked in (peeking defeats the drill).
-practice-python-debugging/mock-*/ANSWERS.md
+# Note: practice-python-debugging/ is intentionally fully open — the
+# ANSWERS.md keys and mock-1's worked solution (eval_harness_solution.py)
+# are checked in on purpose, as worked references.

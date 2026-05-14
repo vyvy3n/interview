@@ -26,6 +26,12 @@ module, not the tests.
 
 19 bugs total across the three, spanning every required topic in the email.
 
+**Worked reference:** `mock-1-eval-harness/eval_harness_solution.py` is a
+fully-fixed version of mock 1 — all 16 tests pass. Use it to see what a
+solved mock looks like (and how the fixes read in context) before or after
+attempting mock 2 and mock 3. Each mock's `ANSWERS.md` documents every bug
+and its fix.
+
 ## How to practice
 
 ```bash
