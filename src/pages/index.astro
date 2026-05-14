@@ -66,6 +66,23 @@ class P(NamedTuple): y; x  # field ORDER — positional construction silently sw
 [d[c] for c in s]          # KeyError on miss — want [d.get(c, default) ...]
 total // count             # int division where you wanted /`;
 
+const mutableDefaultSnippet = `# BAD — seen=[] is built ONCE at def-time; every call shares that one list
+def merge_vocabs(vocab_lists, seen=[]):
+    for toks in vocab_lists:
+        for t in toks:
+            if t not in seen:
+                seen.append(t)
+    return seen
+
+merge_vocabs([["x", "y"]])   # ['x', 'y']
+merge_vocabs([["p", "q"]])   # ['x', 'y', 'p', 'q']  <- leaked from call 1!
+
+# GOOD — default None, build a fresh list inside the body
+def merge_vocabs(vocab_lists, seen=None):
+    if seen is None:
+        seen = []
+    ...  # same body`;
+
 const sortingSnippet = `sorted(xs)                          # ascending — returns a NEW list
 sorted(xs, reverse=True)            # descending
 xs.sort()                           # in-place — returns None!
@@ -350,6 +367,17 @@ const totalConcepts = allItems.length;
         <code>(N,)</code> vector into the <code>(N,1)</code> column from the rule above.</p>
       <h3>Pure Python</h3>
       <Code code={pythonArchetypes} lang="python" theme="github-light" wrap />
+      <h3>Mutable default arguments</h3>
+      <p class="dbg-sub"><strong>Rule:</strong> a default value is bound <em>once</em>, at
+        <code>def</code> time. A mutable default (<code>[]</code>, <code>{}</code>,
+        <code>set()</code>) is <em>one shared object</em> across every call — mutate it and
+        state leaks between calls (and earlier return values change under you, since they're
+        the same object).</p>
+      <Code code={mutableDefaultSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>Tell:</strong> a test that passes alone but fails in the suite,
+        or a function whose output grows across calls (mock-2's <code>merge_vocabs</code>).
+        <strong>One-liner memory:</strong> <em>default <code>None</code>, build <code>[]</code>
+        inside the function body.</em></p>
       <a href="#top" class="to-top">↑ top</a>
     </div>
 
