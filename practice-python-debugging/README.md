@@ -12,7 +12,7 @@ assessment isn't publicly attested anywhere — these mocks are built from
 the official email's required-topic list crossed with documented Python /
 NumPy gotchas, not from leaked questions.
 
-## The six mocks — a difficulty ladder
+## The seven mocks — a difficulty ladder
 
 Each mock is a self-contained directory: a buggy module + a `test_*.py`
 spec + an `ANSWERS.md` key. Every mock follows the real format — fix the
@@ -21,7 +21,10 @@ module, not the tests.
 **Mocks 1–3 are pdb-onboarding tier** — basic enough to learn the debugger
 and the predict→check loop on. **Mocks 4–6 are interview-realistic** —
 LLM-domain codebases (tokenizer, attention, sampler) with harder, subtler,
-interacting bugs. Climb the ladder in order.
+interacting bugs. **Mock 7 is real-assessment difficulty** — bugs in nested
+algorithmic logic where the symptom is far from the cause and finding them
+needs tracing the intended algorithm, not pattern-matching an archetype.
+Climb the ladder in order.
 
 | Mock | Tier | Domain | Bugs | Topics exercised |
 |---|---|---|---|---|
@@ -30,11 +33,14 @@ interacting bugs. Climb the ladder in order.
 | `mock-3-gridworld/` | onboarding | multi-armed bandit + gridworld DP | 6 | class vs instance attr, int vs float division, `where` div-by-zero guard, `sum` axis, `min`/`max`, recursion boundary case |
 | `mock-4-bpe-tokenizer/` | **interview** | BPE tokenizer: vocab, merges, encode/decode | 7 | vocab off-by-one, `NamedTuple` positional swap, **recursion loop-range off-by-one**, list-comp `dict.get`, `bincount` minlength, `where`/`nonzero`, float division |
 | `mock-5-attention/` | **interview** | scaled dot-product attention + masking | 7 | **softmax numerical stability (overflow→nan)**, `keepdims` broadcasting, `1/sqrt(d)` scaling, `tril` offset, `where` 3-arg branch order, `(B,S)` vs `(B,S,S)` broadcast, `sum` axis |
-| `mock-6-sampler/` | **interview (hardest)** | temperature / top-k / top-p / generation | 8 | temperature formula, `argsort` direction, renormalization, `max` vs `argmax`, `nonzero`, `RandomState` re-seed, recursion base-case off-by-one, perplexity formula |
+| `mock-6-sampler/` | **interview** | temperature / top-k / top-p / generation | 8 | temperature formula, `argsort` direction, renormalization, `max` vs `argmax`, `nonzero`, `RandomState` re-seed, recursion base-case off-by-one, perplexity formula |
+| `mock-7-beam-search/` | **hardest** | beam-search decoder | 6 | **nested algorithmic logic** — structural (no global prune; token-list aliasing), missing-logic (no finished-beam guard; raw vs length-normalized pick), subtle indexing deep in a loop, algorithm-understanding (`prune` sort direction). Bugs interact; symptom far from cause. Self-teaching docstrings + tests. |
 
-**40 bugs total.** Mocks 1–3 cover every required topic gently; mocks 4–6
+**46 bugs total.** Mocks 1–3 cover every required topic gently; mocks 4–6
 re-hit them in realistic, harder, LLM-flavored code where bugs sit in shared
-helpers and cascade.
+helpers and cascade; mock 7 is the closest to a real "fix this codebase"
+assessment — read its docstrings and test file to learn beam search from
+scratch.
 
 **Worked reference:** `mock-1-eval-harness/eval_harness_solution.py` is a
 fully-fixed version of mock 1 — all 16 tests pass. Every mock's `ANSWERS.md`

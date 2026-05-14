@@ -178,7 +178,8 @@ const debugMocks = [
   { num: '3', dir: 'mock-3-gridworld',      title: 'Gridworld Bandit', tier: 'onboarding', bugs: 6, tag: 'bandit + DP' },
   { num: '4', dir: 'mock-4-bpe-tokenizer',  title: 'BPE Tokenizer',   tier: 'interview',   bugs: 7, tag: 'merges + encode/decode' },
   { num: '5', dir: 'mock-5-attention',      title: 'Attention',       tier: 'interview',   bugs: 7, tag: 'softmax + masking' },
-  { num: '6', dir: 'mock-6-sampler',        title: 'Sampler / Decoder', tier: 'hardest',   bugs: 8, tag: 'temp + top-k/p + gen' },
+  { num: '6', dir: 'mock-6-sampler',        title: 'Sampler / Decoder', tier: 'interview',   bugs: 8, tag: 'temp + top-k/p + gen' },
+  { num: '7', dir: 'mock-7-beam-search',    title: 'Beam Search ★',     tier: 'hardest',    bugs: 6, tag: 'nested logic — real-difficulty' },
 ];
 
 // ── General coding (the previous home content) ──
@@ -535,7 +536,7 @@ const totalConcepts = allItems.length;
     </div>
 
     <div class="section problems-section" id="dbg-mocks">
-      <h2>Practice — the 6-mock difficulty ladder</h2>
+      <h2>Practice — the 7-mock difficulty ladder</h2>
       <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
         each = a buggy module + a failing <code>test_*.py</code> + an <code>ANSWERS.md</code>.
         Fix the module, not the tests. <code>git checkout</code> to reset and re-drill.
