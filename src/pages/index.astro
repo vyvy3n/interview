@@ -241,6 +241,7 @@ const totalConcepts = allItems.length;
         <tbody>
           <tr><td><code>nan</code> / <code>inf</code> in the output</td><td>numerical overflow — <strong>subtract the max before <code>np.exp</code></strong> (stable softmax / log-sum-exp)</td></tr>
           <tr><td><code>ValueError: could not be broadcast … (2,3) (2,)</code></td><td>shape mismatch — a missing <code>keepdims=True</code>, or need <code>x[:, None]</code> to add an axis</td></tr>
+          <tr><td><code>ValueError: truth value of an array … is ambiguous</code></td><td>Python <code>and</code>/<code>or</code>/<code>not</code> used on a boolean <em>array</em> — use bitwise <code>&amp;</code>/<code>|</code>/<code>~</code>, with parens: <code>(a&gt;0) &amp; (b&gt;0)</code></td></tr>
           <tr><td><code>'tuple' object has no attribute 'ndim'</code></td><td><code>np.where(cond)</code> / <code>np.nonzero()</code> with one arg returns a <strong>tuple</strong> — index <code>[0]</code></td></tr>
           <tr><td>result has the right values in the <strong>wrong places</strong></td><td><code>np.where(cond, a, b)</code> — the two branches are swapped</td></tr>
           <tr><td>array has right values, <strong>wrong shape</strong></td><td>wrong <code>axis=</code> on <code>sum</code>/<code>min</code>/<code>max</code>, or wrong <code>k=</code> on <code>triu</code>/<code>tril</code></td></tr>
@@ -267,7 +268,31 @@ np.sum(x, axis=-1)         # …drop the axis → divide won't broadcast. keepdi
 np.exp(x)                  # OVERFLOWS for large x → nan. exp(x - x.max())
 np.max(probs)              # the VALUE; greedy decode wants np.argmax (the index)
 np.random.seed(s)          # mutates GLOBAL rng. Use rng = np.random.RandomState(s)
-np.argsort(x)[:k]          # the k LOWEST. Top-k is [-k:]</code></pre>
+np.argsort(x)[:k]          # the k LOWEST. Top-k is [-k:]
+(a&gt;0) and (b&gt;0)          # ValueError on arrays! bitwise: (a&gt;0) &amp; (b&gt;0)  ←parens</code></pre>
+      <h3>Broadcasting — divide rows vs. columns by a vector</h3>
+      <p class="dbg-sub">The single most common broadcasting fix. Memorize which one needs the reshape.</p>
+      <pre><code>m = np.array([[10,10],[20,20],[30,30]])   # shape (3, 2)
+
+# DIVIDE EACH ROW i by v[i]  →  v must become a COLUMN (N,1)
+v = np.array([2,4,6])                      # (3,) — one per row
+m / v[:, None]          # ✓   also: v[:, np.newaxis] · v.reshape(-1,1)
+m / v                   # ✗   ValueError: (3,2) vs (3,)
+
+# DIVIDE EACH COLUMN j by v[j]  →  v stays 1-D (N,), broadcasts as-is
+v = np.array([10,20])                      # (2,) — one per column
+m / v                   # ✓   no reshape needed</code></pre>
+      <table class="dbg-table">
+        <thead><tr><th>goal</th><th>vector length</th><th>vector shape needed</th></tr></thead>
+        <tbody>
+          <tr><td>divide each <strong>row</strong> by <code>v[i]</code></td><td>= num rows</td><td>must be 2-D <code>(N,1)</code> → <code>v[:, None]</code></td></tr>
+          <tr><td>divide each <strong>column</strong> by <code>v[j]</code></td><td>= num cols</td><td>1-D <code>(N,)</code> is fine — broadcasts as-is</td></tr>
+        </tbody>
+      </table>
+      <p class="dbg-sub"><strong>Rule:</strong> a vector broadcasts against the matrix's
+        <em>trailing</em> axis. Columns already line up <code>(N,)</code>; rows need an explicit
+        column shape <code>(N,1)</code>. This is the same fix as <code>keepdims=True</code> after a
+        row-wise <code>sum</code> — and exactly the bug in mock-5's <code>normalize_rows</code>.</p>
       <h3>Pure Python</h3>
       <pre><code>def f(x, acc=[]):          # mutable default — shared across ALL calls
 class C: log = []          # class attribute — shared across ALL instances
