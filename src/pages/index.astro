@@ -136,6 +136,17 @@ def merge_vocabs(vocab_lists, seen=None):
         seen = []
     ...  # same body`;
 
+const oovSnippet = `merged = apply_merges(list(text), merges)   # items are still STRINGS
+
+# BUG — direct indexing: KeyError on any token never seen in the vocab
+ids = [vocab.token_to_id[tok] for tok in merged]
+
+# FIX — safe lookup: unknowns map to unk_id (when the spec says so)
+ids = [vocab.token_to_id.get(tok, vocab.unk_id) for tok in merged]
+
+# pdb: which pieces are OOV?
+[t for t in merged if t not in vocab.token_to_id]`;
+
 const sortingSnippet = `sorted(xs)                          # ascending — returns a NEW list
 sorted(xs, reverse=True)            # descending
 xs.sort()                           # in-place — returns None!
@@ -463,6 +474,11 @@ const totalConcepts = allItems.length;
         or a function whose output grows across calls (mock-2's <code>merge_vocabs</code>).
         <strong>One-liner memory:</strong> <em>default <code>None</code>, build <code>[]</code>
         inside the function body.</em></p>
+      <h3>OOV tokens — safe dict lookup in <code>encode()</code></h3>
+      <Code code={oovSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub">After merges, tokens are still <em>strings</em> — one never seen in
+        the vocab <code>KeyError</code>s on <code>d[tok]</code>. The spec names the default
+        (<code>unk_id</code>). mock-2 / mock-4 <code>encode()</code>.</p>
       <a href="#top" class="to-top">↑ top</a>
     </div>
 
