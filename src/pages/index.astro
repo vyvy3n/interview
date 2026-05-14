@@ -82,6 +82,43 @@ class P(NamedTuple): y; x  # field ORDER — positional construction silently sw
 [d[c] for c in s]          # KeyError on miss — want [d.get(c, default) ...]
 total // count             # int division where you wanted /`;
 
+const recursionSnippet = `# BUG 1 — the recursive call's return value is DISCARDED
+def flatten(xs):
+    out = []
+    for x in xs:
+        if isinstance(x, list):
+            flatten(x)            # <- result thrown away; nested items vanish
+        else:
+            out.append(x)
+    return out
+# FIX: out.extend(flatten(x))    # capture + merge the return value
+
+# BUG 2 — base case off-by-one: > vs >=
+def gen(seq, max_len):
+    if len(seq) > max_len:        # <- stops one step late -> length max_len+1
+        return seq
+    ...                          # FIX: >=
+
+# WHY it's subtle: every call has its OWN locals. The recursive call's
+# `out` is a DIFFERENT list — its work only comes back through \`return\`.`;
+
+const namedtupleSnippet = `from typing import NamedTuple
+
+class Config(NamedTuple):
+    num_classes: int
+    num_samples: int
+    seed: int
+
+# BUG — positional construction with args in the wrong order.
+# No error: all three are ints, so the swap is SILENT.
+Config(num_samples, num_classes, seed)        # first two swapped!
+# FIX — construct by KEYWORD:
+Config(num_classes=nc, num_samples=ns, seed=s)
+
+# other NamedTuple traps:
+#   - a field with a default must come AFTER all non-default fields
+#   - "subclassing to add a field" does NOT extend the tuple layout`;
+
 const mutableDefaultSnippet = `# BAD — seen=[] is built ONCE at def-time; every call shares that one list
 def merge_vocabs(vocab_lists, seen=[]):
     for toks in vocab_lists:
@@ -337,13 +374,15 @@ const totalConcepts = allItems.length;
           <tr><td><code>ValueError: truth value of an array … is ambiguous</code></td><td>Python <code>and</code>/<code>or</code>/<code>not</code> used on a boolean <em>array</em> — use bitwise <code>&amp;</code>/<code>|</code>/<code>~</code>, with parens: <code>(a&gt;0) &amp; (b&gt;0)</code></td></tr>
           <tr><td><code>'tuple' object has no attribute 'ndim'</code></td><td><code>np.where(cond)</code> / <code>np.nonzero()</code> with one arg returns a <strong>tuple</strong> — index <code>[0]</code></td></tr>
           <tr><td>result has the right values in the <strong>wrong places</strong></td><td><code>np.where(cond, a, b)</code> — the two branches are swapped</td></tr>
+          <tr><td>a field/attribute holds a value that belongs to a <strong>different field</strong> (no error)</td><td>a <code>NamedTuple</code> (or any constructor) built <strong>positionally</strong> with the args in the wrong order — construct by keyword</td></tr>
           <tr><td>array has right values, <strong>wrong shape</strong></td><td>wrong <code>axis=</code> on <code>sum</code>/<code>min</code>/<code>max</code>, or wrong <code>k=</code> on <code>triu</code>/<code>tril</code></td></tr>
           <tr><td>passes <strong>alone</strong>, fails <strong>in the suite</strong></td><td>shared mutable state — mutable default arg, or a class-level <code>[]</code>/<code>{}</code></td></tr>
           <tr><td>output length off by exactly 1</td><td>recursion base case (<code>&gt;</code> vs <code>&gt;=</code>) or a loop <code>range()</code> off-by-one</td></tr>
+          <tr><td>a recursive function "does nothing" / <strong>nested data is missing</strong> from the output</td><td>the recursive call's <strong>return value is discarded</strong> — need <code>return</code> / <code>.extend(...)</code></td></tr>
           <tr><td><code>KeyError</code></td><td><code>d[k]</code> should be <code>d.get(k, default)</code> — the spec names the default</td></tr>
           <tr><td>every random draw identical / not reproducible</td><td>global <code>np.random</code> instead of an instance <code>RandomState</code>, or re-seeding inside a hot path</td></tr>
           <tr><td>a metric is an integer when it should be fractional</td><td><code>//</code> floor division where <code>/</code> was meant</td></tr>
-          <tr><td>a probability array doesn't sum to 1</td><td>missing renormalization (<code>x / x.sum()</code>) after a filter/zeroing step</td></tr>
+          <tr><td>a probability array doesn't sum to 1</td><td>missing renormalization <em>or</em> dividing by the wrong denominator — use <code>x / x.sum()</code>, not <code>x / len(x)</code></td></tr>
         </tbody>
       </table>
       <a href="#top" class="to-top">↑ top</a>
@@ -394,6 +433,22 @@ const totalConcepts = allItems.length;
         <code>(N,)</code> vector into the <code>(N,1)</code> column from the rule above.</p>
       <h3>Pure Python</h3>
       <Code code={pythonArchetypes} lang="python" theme="github-light" wrap />
+      <h3>Recursion</h3>
+      <Code code={recursionSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>Two failure shapes:</strong> a recursive function that
+        "does nothing" / drops nested data → its recursive call's <em>return value is
+        discarded</em> (need <code>return</code> or <code>.extend(...)</code>). An output
+        whose length is off by exactly 1 → a <em>base-case</em> <code>&gt;</code> vs
+        <code>&gt;=</code> (or a loop-<code>range()</code>) off-by-one. <code>pdb</code>:
+        <code>w</code> shows the call stack; <code>cl</code> the breakpoint before stepping
+        over a recursive call or it re-fires on every level.</p>
+      <h3><code>NamedTuple</code> — positional construction silently swaps fields</h3>
+      <Code code={namedtupleSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>Tell:</strong> a field/attribute holds a value that obviously
+        belongs to a <em>different</em> field, with no error raised — the constructor was
+        called positionally with the args in the wrong order. <strong>Fix &amp; habit:</strong>
+        construct NamedTuples by keyword. NamedTuple gives you no positional-arg safety —
+        same-typed fields swap silently.</p>
       <h3>Mutable default arguments</h3>
       <p class="dbg-sub"><strong>Rule:</strong> a default value is bound <em>once</em>, at
         <code>def</code> time. A mutable default (<code>[]</code>, <code>{}</code>,
