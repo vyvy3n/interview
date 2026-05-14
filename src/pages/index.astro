@@ -164,35 +164,6 @@ const totalConcepts = allItems.length;
 
   <!-- ════════════════ DEBUG VIEW (default) ════════════════ -->
   <div id="view-debug">
-    <h1>Python Debugging — Assessment 2</h1>
-    <p style="color: var(--muted); margin-top: -2px;">
-      60-min CodeSignal: you get a broken codebase + a failing <code>unittest</code>
-      suite, and fix the <strong>root cause</strong> of each failure until the tests
-      pass. No AI, proctored. This is the whole playbook — read top to bottom once,
-      then drill the mocks.
-    </p>
-
-    <div class="dbg-box">
-      <h2>The format — what you're walking into</h2>
-      <ul class="tight">
-        <li><strong>Existing code, failing tests.</strong> You read & fix; you don't write from scratch.</li>
-        <li><strong>The test suite IS the spec.</strong> "In case of ambiguity, use the test suite as the final word." If no test checks an edge case, it's <em>not</em> a bug — leave it.</li>
-        <li><strong>Run tests early and often.</strong> Re-run after every fix.</li>
-        <li><strong>Finishing early = bonus.</strong> You do <em>not</em> need every test green to advance — bank the easy ones, don't tunnel on one hard bug.</li>
-        <li><strong>Tools:</strong> <code>print()</code> works; <code>pdb</code>/<code>pdb++</code> is faster. The in-browser graphical debugger is buggy — don't use it.</li>
-      </ul>
-    </div>
-
-    <div class="section">
-      <h2>The one habit — predict → check</h2>
-      <p>Debugging isn't cleverness. It's one repeated move:</p>
-      <blockquote>Before you run a line, <strong>say what you expect</strong> ("this appends, so
-      <code>flat</code> should grow"). Run it. <strong>Check.</strong> Match → keep going.
-      <strong>Mismatch → that line is your bug.</strong></blockquote>
-      <p>The bug is the first place the program stops agreeing with you. pdb is just how you
-      walk the program forward and check.</p>
-    </div>
-
     <div class="section">
       <h2>The 5-move loop (every bug, same loop)</h2>
       <ol class="loop">
@@ -365,12 +336,6 @@ total // count             # int division where you wanted /</code></pre>
           </li>
         ))}
       </ul>
-      <p class="dbg-sub">
-        <strong>How to drill:</strong> read the test file first (it's the spec) → run the suite,
-        read every failure → fix root causes → re-run → check <code>ANSWERS.md</code>.
-        Set a real 60-min timer on mocks 4–6. Full notes &amp; research:
-        <a href="https://github.com/vyvy3n/interview/tree/main/practice-python-debugging" target="_blank" rel="noopener">practice-python-debugging/</a>.
-      </p>
     </div>
 
     <div class="section">
