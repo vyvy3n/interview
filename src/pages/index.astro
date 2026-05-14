@@ -19,6 +19,22 @@ np.random.seed(s)          # mutates GLOBAL rng. Use rng = np.random.RandomState
 np.argsort(x)[:k]          # the k LOWEST. Top-k is [-k:]
 (a > 0) and (b > 0)        # ValueError on arrays! bitwise: (a > 0) & (b > 0)  <- parens`;
 
+const bincountSnippet = `ids = vocab.encode(document)         # 1-D int array of token ids
+
+# BUG: bincount output length is max(ids)+1 — NOT the vocab size.
+# If the highest-id token never appears, the array is too SHORT.
+np.bincount(ids)                     # length 7 when the vocab has 10 tokens
+
+# FIX: minlength pads the output up to the vocab size
+np.bincount(ids, minlength=len(vocab.tokens))
+
+# minlength only EXTENDS, never truncates. If an id can be >= V, the
+# output is too LONG — and the real bug is upstream, in encode().
+
+# Alternative — pre-allocate, so the length is correct by construction:
+counts = np.zeros(len(vocab.tokens), dtype=int)
+np.add.at(counts, ids, 1)            # unbuffered in-place add; handles repeats`;
+
 const broadcastSnippet = `m = np.array([[10, 10], [20, 20], [30, 30]])   # shape (3, 2)
 
 # DIVIDE EACH ROW i by v[i]  ->  v must become a COLUMN (N, 1)
@@ -337,6 +353,17 @@ const totalConcepts = allItems.length;
       <h2>Bug archetypes — recognize on sight</h2>
       <h3>NumPy</h3>
       <Code code={numpyArchetypes} lang="python" theme="github-light" wrap />
+      <h3><code>np.bincount</code> — counting into a fixed-length array</h3>
+      <Code code={bincountSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><code>np.bincount</code> needs <strong>non-negative integers</strong> —
+        a float <code>ids</code> array raises <code>TypeError</code>, a negative id raises
+        <code>ValueError</code>; if you see those at a <code>bincount</code> line, the bug is in
+        what <code>encode()</code> returned. With <strong><code>weights=</code></strong> it
+        returns a <em>float</em> array (summed weights per bin), not int counts — so a
+        <code>dtype</code> assertion can fail (mock-1's <code>empirical_means</code>). Reach for
+        <code>minlength=</code> 90% of the time; reach for <code>np.zeros</code> +
+        <code>np.add.at</code> when an id might exceed <code>V</code> or you want the length
+        guaranteed.</p>
       <h3>Broadcasting — divide rows vs. columns by a vector</h3>
       <p class="dbg-sub">The single most common broadcasting fix. Memorize which one needs the reshape.</p>
       <Code code={broadcastSnippet} lang="python" theme="github-light" wrap />
