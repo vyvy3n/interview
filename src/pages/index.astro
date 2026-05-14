@@ -2,9 +2,19 @@
 import Layout from '../layouts/Layout.astro';
 
 const GH = 'https://github.com/vyvy3n/interview/blob/main/practice-general-coding-ability';
+const GH_DEBUG = 'https://github.com/vyvy3n/interview/tree/main/practice-python-debugging';
 
-// Mock practice problems — pinned at the very top for quick mobile access.
-// Tap a chip to open the problem's README + spec + solution on GitHub.
+// ── Debug mocks — the 6-rung difficulty ladder for Assessment 2 ──
+const debugMocks = [
+  { num: '1', dir: 'mock-1-eval-harness',   title: 'Eval Harness',    tier: 'onboarding',  bugs: 7, tag: 'sampling + stats' },
+  { num: '2', dir: 'mock-2-token-analyzer', title: 'Token Analyzer',  tier: 'onboarding',  bugs: 6, tag: 'vocab + similarity' },
+  { num: '3', dir: 'mock-3-gridworld',      title: 'Gridworld Bandit', tier: 'onboarding', bugs: 6, tag: 'bandit + DP' },
+  { num: '4', dir: 'mock-4-bpe-tokenizer',  title: 'BPE Tokenizer',   tier: 'interview',   bugs: 7, tag: 'merges + encode/decode' },
+  { num: '5', dir: 'mock-5-attention',      title: 'Attention',       tier: 'interview',   bugs: 7, tag: 'softmax + masking' },
+  { num: '6', dir: 'mock-6-sampler',        title: 'Sampler / Decoder', tier: 'hardest',   bugs: 8, tag: 'temp + top-k/p + gen' },
+];
+
+// ── General coding (the previous home content) ──
 const sixLevelProblems = [
   { num: '09', title: 'Task Scheduler',     dir: '09-concurrent-task-scheduler', tag: 'threading' },
   { num: '10', title: 'KV Store',           dir: '10-thread-safe-keyvalue',      tag: 'asyncio'   },
@@ -26,9 +36,6 @@ const fourLevelProblems = [
   { num: '08', title: 'LLM Conv Manager',   dir: '08-llm-conversation-manager',  tag: 'context'  },
 ];
 
-// Pinned curated path for the immediate Anthropic Fellows assessment.
-// Items here also appear in the topical sections below — this is a navigation
-// shortcut, not separate content.
 const fellowsPath = [
   { href: '/concepts/six-level-starter',     title: 'Six-Level Starter Template',     hint: 'paste-ready scaffold for L1-L6 (threading + asyncio variants)' },
   { href: '/concepts/python-snippets',       title: 'Python Snippets',                hint: 'lean one-liner reference: sort, dict, deque, threading, asyncio, heap' },
@@ -39,8 +46,6 @@ const fellowsPath = [
   { href: '/concepts/codesignal',            title: 'CodeSignal & Pytest',            hint: 'how to run tests on the platform; debugging tips' },
 ];
 
-// Unified topic taxonomy. Diagrams + original derivations are integrated INTO
-// each concept page — there is no separate "raw notes" view.
 const sections = [
   {
     title: 'Interview Workflow',
@@ -138,7 +143,6 @@ const sections = [
   },
 ];
 
-// Auto-generated A-Z index from all topical sections (deduplicated).
 const seen = new Set();
 const allItems = sections
   .flatMap(s => s.items)
@@ -152,72 +156,247 @@ const allItems = sections
 const totalConcepts = allItems.length;
 ---
 <Layout title="interview cheat sheet" showHome={false}>
-  <h1>cheat sheet</h1>
-  <p class="quick-bar">
-    <a href="/concepts/six-level-starter">📋 template</a>
-    <a href="/concepts/python-snippets">🐍 snippets</a>
-    <a href="#az-index">A–Z</a>
-  </p>
-  <p style="color: var(--muted); margin-top: -2px;">
-    {totalConcepts} concepts across {sections.length} topics — tap any chip below.
-  </p>
 
-  <div class="section problems-section">
-    <h2>Mock problems <span class="count">(15 in repo)</span></h2>
-    <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
-      tap a chip → opens the problem's spec + solution on GitHub
-    </p>
-
-    <div class="problems-subhead">6-level (matches actual test) — threading + asyncio</div>
-    <ul class="problems-grid">
-      {sixLevelProblems.map(p => (
-        <li>
-          <a href={`${GH}/${p.dir}/solution.py`} target="_blank" rel="noopener" class="chip chip-six">
-            <span class="chip-num">{p.num}</span>
-            <span class="chip-title">{p.title}</span>
-            <span class="chip-tag">{p.tag}</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-
-    <div class="problems-subhead">4-level (warmup)</div>
-    <ul class="problems-grid">
-      {fourLevelProblems.map(p => (
-        <li>
-          <a href={`${GH}/${p.dir}/solution.py`} target="_blank" rel="noopener" class="chip">
-            <span class="chip-num">{p.num}</span>
-            <span class="chip-title">{p.title}</span>
-            <span class="chip-tag">{p.tag}</span>
-          </a>
-        </li>
-      ))}
-    </ul>
+  <div class="view-toggle" role="tablist">
+    <button data-view="debug" class="active" type="button">🐛 Debugging</button>
+    <button data-view="general" type="button">⚙️ General Coding</button>
   </div>
 
-  <div class="section featured">
-    <h2>🎯 Anthropic Fellows — prep path</h2>
-    <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
-      curated 5-step read order for the actual 90-min assessment
+  <!-- ════════════════ DEBUG VIEW (default) ════════════════ -->
+  <div id="view-debug">
+    <h1>Python Debugging — Assessment 2</h1>
+    <p style="color: var(--muted); margin-top: -2px;">
+      60-min CodeSignal: you get a broken codebase + a failing <code>unittest</code>
+      suite, and fix the <strong>root cause</strong> of each failure until the tests
+      pass. No AI, proctored. This is the whole playbook — read top to bottom once,
+      then drill the mocks.
     </p>
-    <ul class="concepts">
-      {fellowsPath.map(item => (
-        <li>
-          <a href={item.href}>
-            {item.title}
-            <small>{item.hint}</small>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
 
-  {sections.map(section => (
+    <div class="dbg-box">
+      <h2>The format — what you're walking into</h2>
+      <ul class="tight">
+        <li><strong>Existing code, failing tests.</strong> You read & fix; you don't write from scratch.</li>
+        <li><strong>The test suite IS the spec.</strong> "In case of ambiguity, use the test suite as the final word." If no test checks an edge case, it's <em>not</em> a bug — leave it.</li>
+        <li><strong>Run tests early and often.</strong> Re-run after every fix.</li>
+        <li><strong>Finishing early = bonus.</strong> You do <em>not</em> need every test green to advance — bank the easy ones, don't tunnel on one hard bug.</li>
+        <li><strong>Tools:</strong> <code>print()</code> works; <code>pdb</code>/<code>pdb++</code> is faster. The in-browser graphical debugger is buggy — don't use it.</li>
+      </ul>
+    </div>
+
     <div class="section">
-      <h2>{section.title} <span class="count">({section.items.length})</span></h2>
-      {section.note && <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">{section.note}</p>}
+      <h2>The one habit — predict → check</h2>
+      <p>Debugging isn't cleverness. It's one repeated move:</p>
+      <blockquote>Before you run a line, <strong>say what you expect</strong> ("this appends, so
+      <code>flat</code> should grow"). Run it. <strong>Check.</strong> Match → keep going.
+      <strong>Mismatch → that line is your bug.</strong></blockquote>
+      <p>The bug is the first place the program stops agreeing with you. pdb is just how you
+      walk the program forward and check.</p>
+    </div>
+
+    <div class="section">
+      <h2>The 5-move loop (every bug, same loop)</h2>
+      <ol class="loop">
+        <li><strong>Read the traceback.</strong> It names the failing line + the symptom.
+          Form a hypothesis: "<code>idx</code> is a tuple → it came from <code>passing_indices</code> → the bug's in there."</li>
+        <li><strong><code>b file.py:&lt;first line of that function&gt;</code> then <code>c</code>.</strong>
+          Freeze at the start of the suspect function.</li>
+        <li><strong><code>cl</code> the breakpoint</strong> → now you have manual control (essential before stepping over a recursive call, or it re-fires).</li>
+        <li><strong><code>a</code> and <code>ll</code></strong> — see the inputs and the code. Then
+          <strong><code>n</code> down the function</strong>, and after each line <strong><code>p</code> the variable</strong> and check your prediction.</li>
+        <li><strong>First mismatch = the bug.</strong> If the mismatching line is a function call,
+          <strong><code>s</code> into it</strong> and repeat one level deeper.</li>
+      </ol>
+    </div>
+
+    <div class="section">
+      <h2>pdb — the ten commands that matter</h2>
+      <table class="dbg-table">
+        <thead><tr><th>cmd</th><th>does</th><th>you reach for it when…</th></tr></thead>
+        <tbody>
+          <tr><td><code>l</code> / <code>ll</code></td><td>list 11 lines / the whole function</td><td>"where am I in the code"</td></tr>
+          <tr><td><code>w</code></td><td>print the call stack</td><td>"how did I get here" — esp. recursion</td></tr>
+          <tr><td><code>a</code></td><td>print the current function's args</td><td>first thing after a breakpoint hits</td></tr>
+          <tr><td><code>p</code> / <code>pp</code></td><td>print / pretty-print any expression</td><td>inspect a var — <em>or evaluate a call</em>: <code>p np.sum(x,axis=1)</code></td></tr>
+          <tr><td><code>n</code></td><td>run line, <strong>step over</strong> calls</td><td>walk down a function</td></tr>
+          <tr><td><code>s</code></td><td>run line, <strong>step into</strong> calls</td><td>descend into a suspect function</td></tr>
+          <tr><td><code>r</code></td><td>run until this function returns — <strong>shows the return value</strong></td><td>"what does this actually return"</td></tr>
+          <tr><td><code>c</code></td><td>continue to next breakpoint</td><td>skip ahead</td></tr>
+          <tr><td><code>b file:line</code></td><td>set a breakpoint</td><td>stop exactly where you suspect</td></tr>
+          <tr><td><code>cl N</code></td><td>clear breakpoint N</td><td>stop it re-firing (loops / recursion)</td></tr>
+          <tr><td><code>u</code> / <code>d</code></td><td>move up / down a stack frame</td><td>inspect the <em>caller's</em> variables</td></tr>
+        </tbody>
+      </table>
+      <p class="dbg-sub"><strong>3 ways into pdb:</strong>
+        <code>python -m pdb -m unittest test_x</code> (start under pdb) ·
+        <code>breakpoint()</code> in the code (opens pdb there) ·
+        post-mortem after a crash: <code>import pdb; pdb.pm()</code>.</p>
+    </div>
+
+    <div class="section">
+      <h2>Symptom → suspect — the fast-triage table</h2>
+      <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
+        the failure message usually <em>is</em> the diagnosis. Learn to read it.</p>
+      <table class="dbg-table">
+        <thead><tr><th>you see…</th><th>look for…</th></tr></thead>
+        <tbody>
+          <tr><td><code>nan</code> / <code>inf</code> in the output</td><td>numerical overflow — <strong>subtract the max before <code>np.exp</code></strong> (stable softmax / log-sum-exp)</td></tr>
+          <tr><td><code>ValueError: could not be broadcast … (2,3) (2,)</code></td><td>shape mismatch — a missing <code>keepdims=True</code>, or need <code>x[:, None]</code> to add an axis</td></tr>
+          <tr><td><code>'tuple' object has no attribute 'ndim'</code></td><td><code>np.where(cond)</code> / <code>np.nonzero()</code> with one arg returns a <strong>tuple</strong> — index <code>[0]</code></td></tr>
+          <tr><td>result has the right values in the <strong>wrong places</strong></td><td><code>np.where(cond, a, b)</code> — the two branches are swapped</td></tr>
+          <tr><td>array has right values, <strong>wrong shape</strong></td><td>wrong <code>axis=</code> on <code>sum</code>/<code>min</code>/<code>max</code>, or wrong <code>k=</code> on <code>triu</code>/<code>tril</code></td></tr>
+          <tr><td>passes <strong>alone</strong>, fails <strong>in the suite</strong></td><td>shared mutable state — mutable default arg, or a class-level <code>[]</code>/<code>{}</code></td></tr>
+          <tr><td>output length off by exactly 1</td><td>recursion base case (<code>&gt;</code> vs <code>&gt;=</code>) or a loop <code>range()</code> off-by-one</td></tr>
+          <tr><td><code>KeyError</code></td><td><code>d[k]</code> should be <code>d.get(k, default)</code> — the spec names the default</td></tr>
+          <tr><td>every random draw identical / not reproducible</td><td>global <code>np.random</code> instead of an instance <code>RandomState</code>, or re-seeding inside a hot path</td></tr>
+          <tr><td>a metric is an integer when it should be fractional</td><td><code>//</code> floor division where <code>/</code> was meant</td></tr>
+          <tr><td>a probability array doesn't sum to 1</td><td>missing renormalization (<code>x / x.sum()</code>) after a filter/zeroing step</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Bug archetypes — recognize on sight</h2>
+      <h3>NumPy</h3>
+      <pre><code>np.bincount(x)              # length = x.max()+1 — too short. Fix: minlength=V
+np.where(cond)             # returns a TUPLE of index arrays — index [0]
+np.where(cond, a, b)       # 3-arg = elementwise select. Don't swap a/b.
+np.nonzero(arr)            # also a tuple, length = arr.ndim
+a - b   # a:(n,)  b:(n,1)  # silently broadcasts to (n,n) — no error!
+np.sum(x, axis=?)          # axis=0 down columns, axis=1 across rows
+np.sum(x, axis=-1)         # …drop the axis → divide won't broadcast. keepdims=True
+np.exp(x)                  # OVERFLOWS for large x → nan. exp(x - x.max())
+np.max(probs)              # the VALUE; greedy decode wants np.argmax (the index)
+np.random.seed(s)          # mutates GLOBAL rng. Use rng = np.random.RandomState(s)
+np.argsort(x)[:k]          # the k LOWEST. Top-k is [-k:]</code></pre>
+      <h3>Pure Python</h3>
+      <pre><code>def f(x, acc=[]):          # mutable default — shared across ALL calls
+class C: log = []          # class attribute — shared across ALL instances
+def rec(...): rec(sub)     # recursion: return value DISCARDED — need return/extend
+if n &gt; limit: ...          # recursion base case off-by-one — &gt; vs &gt;=
+for i in range(len(a)-2)   # loop-range off-by-one — misses the last pair
+class P(NamedTuple): y;x   # field ORDER — positional construction silently swaps
+[f(i) for i in xs]         # late-binding closure: lambdas capture the FINAL i
+[d[c] for c in s]          # KeyError on miss — want [d.get(c, default) ...]
+total // count             # int division where you wanted /</code></pre>
+    </div>
+
+    <div class="section">
+      <h2>Required topics — the email's checklist</h2>
+      <p><strong>Python:</strong> classes &amp; methods · list comprehensions · recursion ·
+        <code>typing.NamedTuple</code> (the email says "<code>collections.NamedTuple</code>" — no
+        such thing; it means the <code>typing</code> class) · <code>unittest</code>.</p>
+      <p><strong>NumPy:</strong> <code>np.array</code> · <code>np.min</code>/<code>np.max</code> ·
+        <code>np.sum</code> · <code>np.bincount</code> · <code>np.nonzero</code> ·
+        <code>np.where</code> · <code>np.random.RandomState</code> · <strong>broadcasting</strong> ·
+        floating-point numbers.</p>
+      <p style="color: var(--muted); font-size: 0.85rem;">Every mock below exercises these.
+        Note the list is about <em>primitives</em> — the skill is the same whatever domain
+        the codebase dresses itself in.</p>
+    </div>
+
+    <div class="section problems-section">
+      <h2>Practice — the 6-mock difficulty ladder</h2>
+      <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
+        each = a buggy module + a failing <code>test_*.py</code> + an <code>ANSWERS.md</code>.
+        Fix the module, not the tests. <code>git checkout</code> to reset and re-drill.
+      </p>
+      <div class="problems-subhead">onboarding — learn pdb + the predict→check loop</div>
+      <ul class="problems-grid">
+        {debugMocks.filter(m => m.tier === 'onboarding').map(m => (
+          <li>
+            <a href={`${GH_DEBUG}/${m.dir}`} target="_blank" rel="noopener" class="chip">
+              <span class="chip-num">{m.num}</span>
+              <span class="chip-title">{m.title}</span>
+              <span class="chip-tag">{m.bugs} bugs · {m.tag}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="problems-subhead">interview-realistic — LLM codebases, harder + interacting bugs</div>
+      <ul class="problems-grid">
+        {debugMocks.filter(m => m.tier !== 'onboarding').map(m => (
+          <li>
+            <a href={`${GH_DEBUG}/${m.dir}`} target="_blank" rel="noopener" class="chip chip-six">
+              <span class="chip-num">{m.num}</span>
+              <span class="chip-title">{m.title}</span>
+              <span class="chip-tag">{m.bugs} bugs · {m.tag}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="dbg-sub">
+        <strong>How to drill:</strong> read the test file first (it's the spec) → run the suite,
+        read every failure → fix root causes → re-run → check <code>ANSWERS.md</code>.
+        Set a real 60-min timer on mocks 4–6. Full notes &amp; research:
+        <a href="https://github.com/vyvy3n/interview/tree/main/practice-python-debugging" target="_blank" rel="noopener">practice-python-debugging/</a>.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Last-5-minutes reminders</h2>
+      <ul class="tight">
+        <li>The <strong>test suite is the spec</strong> — don't fix what isn't tested.</li>
+        <li><strong>Bank the easy bugs first.</strong> A bug you can't crack fast: skip it, come back. You don't need 100%.</li>
+        <li>Debug <strong>bottom-up</strong> — fix the leaf helper before the function that calls it.</li>
+        <li><code>nan</code> → subtract the max. Shape error → <code>keepdims</code> / <code>[:,None]</code>.
+          Tuple-has-no-attribute → <code>[0]</code>. Passes-alone-fails-in-suite → shared mutable state.</li>
+        <li>A test <em>passing</em> doesn't mean the function is correct — it means <em>that input</em> is. Trust the failing test.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ════════════════ GENERAL VIEW ════════════════ -->
+  <div id="view-general" hidden>
+    <h1>cheat sheet</h1>
+    <p class="quick-bar">
+      <a href="/concepts/six-level-starter">📋 template</a>
+      <a href="/concepts/python-snippets">🐍 snippets</a>
+      <a href="#az-index">A–Z</a>
+    </p>
+    <p style="color: var(--muted); margin-top: -2px;">
+      {totalConcepts} concepts across {sections.length} topics — tap any chip below.
+    </p>
+
+    <div class="section problems-section">
+      <h2>Mock problems <span class="count">(15 in repo)</span></h2>
+      <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
+        tap a chip → opens the problem's spec + solution on GitHub
+      </p>
+
+      <div class="problems-subhead">6-level (matches actual test) — threading + asyncio</div>
+      <ul class="problems-grid">
+        {sixLevelProblems.map(p => (
+          <li>
+            <a href={`${GH}/${p.dir}/solution.py`} target="_blank" rel="noopener" class="chip chip-six">
+              <span class="chip-num">{p.num}</span>
+              <span class="chip-title">{p.title}</span>
+              <span class="chip-tag">{p.tag}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <div class="problems-subhead">4-level (warmup)</div>
+      <ul class="problems-grid">
+        {fourLevelProblems.map(p => (
+          <li>
+            <a href={`${GH}/${p.dir}/solution.py`} target="_blank" rel="noopener" class="chip">
+              <span class="chip-num">{p.num}</span>
+              <span class="chip-title">{p.title}</span>
+              <span class="chip-tag">{p.tag}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="section featured">
+      <h2>🎯 Anthropic Fellows — prep path</h2>
+      <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
+        curated 5-step read order for the actual 90-min assessment
+      </p>
       <ul class="concepts">
-        {section.items.map(item => (
+        {fellowsPath.map(item => (
           <li>
             <a href={item.href}>
               {item.title}
@@ -227,22 +406,130 @@ const totalConcepts = allItems.length;
         ))}
       </ul>
     </div>
-  ))}
 
-  <div class="section az" id="az-index">
-    <h2>A–Z index</h2>
-    <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
-      every concept, alphabetical — for when you know the name
-    </p>
-    <ul class="az-grid">
-      {allItems.map(item => (
-        <li><a href={item.href}>{item.title}</a></li>
-      ))}
-    </ul>
+    {sections.map(section => (
+      <div class="section">
+        <h2>{section.title} <span class="count">({section.items.length})</span></h2>
+        {section.note && <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">{section.note}</p>}
+        <ul class="concepts">
+          {section.items.map(item => (
+            <li>
+              <a href={item.href}>
+                {item.title}
+                <small>{item.hint}</small>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+
+    <div class="section az" id="az-index">
+      <h2>A–Z index</h2>
+      <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
+        every concept, alphabetical — for when you know the name
+      </p>
+      <ul class="az-grid">
+        {allItems.map(item => (
+          <li><a href={item.href}>{item.title}</a></li>
+        ))}
+      </ul>
+    </div>
   </div>
+
+  <script is:inline>
+    (function () {
+      var views = {
+        debug: document.getElementById('view-debug'),
+        general: document.getElementById('view-general'),
+      };
+      var buttons = document.querySelectorAll('.view-toggle button');
+      function show(v) {
+        if (!views[v]) v = 'debug';
+        for (var k in views) views[k].hidden = (k !== v);
+        buttons.forEach(function (b) {
+          b.classList.toggle('active', b.dataset.view === v);
+        });
+        try { localStorage.setItem('cheatsheet-view', v); } catch (e) {}
+        window.scrollTo(0, 0);
+      }
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () { show(b.dataset.view); });
+      });
+      var saved;
+      try { saved = localStorage.getItem('cheatsheet-view'); } catch (e) {}
+      if (saved === 'general') show('general');  // default is debug
+    })();
+  </script>
 </Layout>
 
 <style>
+  .view-toggle {
+    display: flex;
+    gap: 0;
+    margin: 6px 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .view-toggle button {
+    flex: 1;
+    padding: 9px 12px;
+    background: var(--bg);
+    color: var(--muted);
+    border: none;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .view-toggle button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  @media (max-width: 640px) {
+    .view-toggle button { font-size: 0.85rem; padding: 8px 8px; }
+  }
+
+  .dbg-box {
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px 14px 10px;
+    margin: 1rem 0 1.4rem;
+  }
+  .dbg-box h2 { color: var(--accent); margin-top: 0.5em; }
+
+  ul.tight { margin: 0.4em 0; padding-left: 1.2em; }
+  ul.tight li { border: none; padding: 2px 0; }
+
+  ol.loop { padding-left: 1.3em; margin: 0.5em 0; }
+  ol.loop li { padding: 4px 0; }
+
+  .dbg-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+    margin: 0.5em 0;
+    display: block;
+    overflow-x: auto;
+  }
+  .dbg-table th, .dbg-table td {
+    border: 1px solid var(--border);
+    padding: 6px 9px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .dbg-table th { background: var(--code-bg); font-weight: 600; }
+  .dbg-table code { font-size: 0.92em; }
+
+  .dbg-sub { color: var(--muted); font-size: 0.85rem; margin: 6px 0; }
+
+  @media (max-width: 640px) {
+    .dbg-table { font-size: 0.78rem; }
+    .dbg-table th, .dbg-table td { padding: 4px 6px; }
+    .dbg-box { padding: 6px 10px 8px; }
+  }
+
   .quick-bar {
     display: flex;
     gap: 14px;
