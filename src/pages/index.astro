@@ -324,6 +324,14 @@ const totalConcepts = allItems.length;
 
     <div class="section" id="dbg-loop">
       <h2>The 5-move loop (every bug, same loop)</h2>
+      <p class="dbg-sub"><strong>Step 0 — get a pdb prompt.</strong> Two ways:
+        <strong>(a)</strong> drop <code>breakpoint()</code> onto the line you suspect, then
+        run the tests <em>normally</em> — <code>python -m unittest test_x</code> — pdb opens
+        right there in your code (you can skip move 2). <strong>(b)</strong>
+        <code>python -m pdb -m unittest test_x.TestClass.test_method</code> — launches the
+        run under pdb, but you land in unittest's machinery, so use move 2 to reach your
+        code. <code>breakpoint()</code> teleports pdb <em>to</em> your code; <code>-m pdb</code>
+        <em>launches under</em> pdb.</p>
       <ol class="loop">
         <li><strong>Read the traceback.</strong> It names the failing line + the symptom.
           Form a hypothesis: "<code>idx</code> is a tuple → it came from <code>passing_indices</code> → the bug's in there."</li>
