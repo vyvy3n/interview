@@ -12,25 +12,33 @@ assessment isn't publicly attested anywhere — these mocks are built from
 the official email's required-topic list crossed with documented Python /
 NumPy gotchas, not from leaked questions.
 
-## The three mocks
+## The six mocks — a difficulty ladder
 
 Each mock is a self-contained directory: a buggy module + a `test_*.py`
-spec + an `ANSWERS.md` key. All three follow the real format — fix the
+spec + an `ANSWERS.md` key. Every mock follows the real format — fix the
 module, not the tests.
 
-| Mock | Domain | Bugs | Topics exercised |
-|---|---|---|---|
-| `mock-1-eval-harness/` | label sampling + per-class stats | 7 | `NamedTuple` field order, `RandomState` isolation, `np.bincount` minlength, `np.sum` axis, `np.where` 1-arg, recursion return value, float fractions |
-| `mock-2-token-analyzer/` | tokenization + vocab + similarity | 6 | list-comprehension filter, `np.bincount`, `np.where` 1-arg vs 3-arg, broadcasting `(n,)` vs `(n,1)`, NumPy `&` vs `and`, mutable default arg |
-| `mock-3-gridworld/` | multi-armed bandit + gridworld DP | 6 | class vs instance attribute, int vs float division, `np.where` div-by-zero guard, `np.sum` axis, `np.min`/`np.max`, recursion boundary case |
+**Mocks 1–3 are pdb-onboarding tier** — basic enough to learn the debugger
+and the predict→check loop on. **Mocks 4–6 are interview-realistic** —
+LLM-domain codebases (tokenizer, attention, sampler) with harder, subtler,
+interacting bugs. Climb the ladder in order.
 
-19 bugs total across the three, spanning every required topic in the email.
+| Mock | Tier | Domain | Bugs | Topics exercised |
+|---|---|---|---|---|
+| `mock-1-eval-harness/` | onboarding | label sampling + per-class stats | 7 | `NamedTuple` field order, `RandomState` isolation, `bincount` minlength, `sum` axis, `where` 1-arg, recursion return value, float fractions |
+| `mock-2-token-analyzer/` | onboarding | tokenization + vocab + similarity | 6 | list-comp filter, `bincount`, `where` 1-arg vs 3-arg, broadcasting `(n,)` vs `(n,1)`, `&` vs `and`, mutable default arg |
+| `mock-3-gridworld/` | onboarding | multi-armed bandit + gridworld DP | 6 | class vs instance attr, int vs float division, `where` div-by-zero guard, `sum` axis, `min`/`max`, recursion boundary case |
+| `mock-4-bpe-tokenizer/` | **interview** | BPE tokenizer: vocab, merges, encode/decode | 7 | vocab off-by-one, `NamedTuple` positional swap, **recursion loop-range off-by-one**, list-comp `dict.get`, `bincount` minlength, `where`/`nonzero`, float division |
+| `mock-5-attention/` | **interview** | scaled dot-product attention + masking | 7 | **softmax numerical stability (overflow→nan)**, `keepdims` broadcasting, `1/sqrt(d)` scaling, `tril` offset, `where` 3-arg branch order, `(B,S)` vs `(B,S,S)` broadcast, `sum` axis |
+| `mock-6-sampler/` | **interview (hardest)** | temperature / top-k / top-p / generation | 8 | temperature formula, `argsort` direction, renormalization, `max` vs `argmax`, `nonzero`, `RandomState` re-seed, recursion base-case off-by-one, perplexity formula |
+
+**40 bugs total.** Mocks 1–3 cover every required topic gently; mocks 4–6
+re-hit them in realistic, harder, LLM-flavored code where bugs sit in shared
+helpers and cascade.
 
 **Worked reference:** `mock-1-eval-harness/eval_harness_solution.py` is a
-fully-fixed version of mock 1 — all 16 tests pass. Use it to see what a
-solved mock looks like (and how the fixes read in context) before or after
-attempting mock 2 and mock 3. Each mock's `ANSWERS.md` documents every bug
-and its fix.
+fully-fixed version of mock 1 — all 16 tests pass. Every mock's `ANSWERS.md`
+documents every bug, how it surfaces, and debugging notes.
 
 ## How to practice
 
