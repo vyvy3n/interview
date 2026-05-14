@@ -293,6 +293,22 @@ m / v                   # ✓   no reshape needed</code></pre>
         <em>trailing</em> axis. Columns already line up <code>(N,)</code>; rows need an explicit
         column shape <code>(N,1)</code>. This is the same fix as <code>keepdims=True</code> after a
         row-wise <code>sum</code> — and exactly the bug in mock-5's <code>normalize_rows</code>.</p>
+      <h3>The two meanings of <code>None</code> in NumPy</h3>
+      <pre><code>arr = np.array([[1,2],[3,4]])
+
+# (1) axis=None in a REDUCTION → collapse everything to a scalar
+np.sum(arr, axis=None)     # 10     (axis=None is the default)
+np.sum(arr, axis=0)        # [4,6]  — down columns
+np.sum(arr, axis=1)        # [3,7]  — across rows
+
+# (2) None as an INDEX → alias for np.newaxis: inserts a size-1 axis
+a = np.array([1,2,3])      # shape (3,)
+a[:, None]                 # shape (3,1) — a COLUMN vector
+a[None, :]                 # shape (1,3) — a ROW vector</code></pre>
+      <p class="dbg-sub"><strong>Don't confuse them:</strong> <code>axis=None</code>
+        <em>removes</em> dimensions (reduce over the flattened array); <code>x[..., None]</code>
+        <em>adds</em> one. The index form is your broadcasting tool — it's how you turn a
+        <code>(N,)</code> vector into the <code>(N,1)</code> column from the rule above.</p>
       <h3>Pure Python</h3>
       <pre><code>def f(x, acc=[]):          # mutable default — shared across ALL calls
 class C: log = []          # class attribute — shared across ALL instances
