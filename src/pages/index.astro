@@ -102,6 +102,14 @@ def gen(seq, max_len):
 # WHY it's subtle: every call has its OWN locals. The recursive call's
 # 'out' is a DIFFERENT list — its work only comes back through 'return'.`;
 
+const slicingSnippet = `xs = ["a", "b", "c"]      # len 3
+xs[3]                     # IndexError
+xs[3:]                    # []           slices CLAMP — never raise
+xs[1:99]                  # ['b', 'c']   stop clamped to len
+
+# so tokens[i+2:] is "the tail, or [] if past the end" —
+# no  if i+2 < len(tokens)  guard needed`;
+
 const namedtupleSnippet = `from typing import NamedTuple
 
 class Config(NamedTuple):
@@ -456,6 +464,8 @@ const totalConcepts = allItems.length;
         <code>&gt;=</code> (or a loop-<code>range()</code>) off-by-one. <code>pdb</code>:
         <code>w</code> shows the call stack; <code>cl</code> the breakpoint before stepping
         over a recursive call or it re-fires on every level.</p>
+      <h3>Slices clamp — never <code>IndexError</code></h3>
+      <Code code={slicingSnippet} lang="python" theme="github-light" wrap />
       <h3><code>NamedTuple</code> — positional construction silently swaps fields</h3>
       <Code code={namedtupleSnippet} lang="python" theme="github-light" wrap />
       <p class="dbg-sub"><strong>Tell:</strong> a field/attribute holds a value that obviously
