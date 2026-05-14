@@ -19,3 +19,6 @@ __pycache__
 # Practitioners should write their own solution.py from dns_exercise.py.
 practice-general-coding-ability/15-dns-resolver/solution.py
 practice-general-coding-ability/15-dns-resolver/solution_independent.py
+
+# Debugging-mock answer keys — kept local, not checked in (peeking defeats the drill).
+practice-python-debugging/mock-*/ANSWERS.md
