@@ -66,6 +66,22 @@ class P(NamedTuple): y; x  # field ORDER — positional construction silently sw
 [d[c] for c in s]          # KeyError on miss — want [d.get(c, default) ...]
 total // count             # int division where you wanted /`;
 
+const sortingSnippet = `sorted(xs)                          # ascending — returns a NEW list
+sorted(xs, reverse=True)            # descending
+xs.sort()                           # in-place — returns None!
+
+# key= : sort by a derived value
+sorted(words, key=len)              # by length
+sorted(pairs, key=lambda p: p[1])   # by the 2nd element of each pair
+sorted(items, key=lambda x: x.score)
+
+# descending by a numeric key — negate it
+sorted(indices, key=lambda i: -counts[i])      # highest count first
+sorted(items, key=lambda x: -x.score)
+
+# multi-key — a tuple sorts left-to-right
+sorted(items, key=lambda x: (x.group, -x.score))   # group asc, then score desc`;
+
 // ── Debug mocks — the 6-rung difficulty ladder for Assessment 2 ──
 const debugMocks = [
   { num: '1', dir: 'mock-1-eval-harness',   title: 'Eval Harness',    tier: 'onboarding',  bugs: 7, tag: 'sampling + stats' },
@@ -231,6 +247,7 @@ const totalConcepts = allItems.length;
       <a href="#dbg-pdb">pdb commands</a>
       <a href="#dbg-symptoms">symptom → suspect</a>
       <a href="#dbg-archetypes">bug archetypes</a>
+      <a href="#dbg-sorting">sorting</a>
       <a href="#dbg-topics">required topics</a>
       <a href="#dbg-mocks">practice</a>
     </p>
@@ -333,6 +350,19 @@ const totalConcepts = allItems.length;
         <code>(N,)</code> vector into the <code>(N,1)</code> column from the rule above.</p>
       <h3>Pure Python</h3>
       <Code code={pythonArchetypes} lang="python" theme="github-light" wrap />
+      <a href="#top" class="to-top">↑ top</a>
+    </div>
+
+    <div class="section" id="dbg-sorting">
+      <h2>Quick reference — sorting</h2>
+      <Code code={sortingSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><code>sorted()</code> returns a <em>new</em> list; <code>.sort()</code>
+        mutates in place and returns <code>None</code> (a classic bug — <code>xs = xs.sort()</code>
+        leaves you with <code>None</code>). <code>key=</code> maps each element to the value you
+        sort <em>by</em>. To sort <strong>descending by a numeric key</strong>, negate it:
+        <code>key=lambda i: -counts[i]</code>. For <strong>tie-breaking</strong>, return a tuple —
+        it compares left-to-right, so <code>(group, -score)</code> is "group ascending, then score
+        descending."</p>
       <a href="#top" class="to-top">↑ top</a>
     </div>
 
