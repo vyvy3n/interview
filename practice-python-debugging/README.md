@@ -12,7 +12,7 @@ assessment isn't publicly attested anywhere — these mocks are built from
 the official email's required-topic list crossed with documented Python /
 NumPy gotchas, not from leaked questions.
 
-## The seven mocks — a difficulty ladder
+## The eight mocks — a difficulty ladder
 
 Each mock is a self-contained directory: a buggy module + a `test_*.py`
 spec + an `ANSWERS.md` key. Every mock follows the real format — fix the
@@ -35,8 +35,9 @@ Climb the ladder in order.
 | `mock-5-attention/` | **interview** | scaled dot-product attention + masking | 7 | **softmax numerical stability (overflow→nan)**, `keepdims` broadcasting, `1/sqrt(d)` scaling, `tril` offset, `where` 3-arg branch order, `(B,S)` vs `(B,S,S)` broadcast, `sum` axis |
 | `mock-6-sampler/` | **interview** | temperature / top-k / top-p / generation | 8 | temperature formula, `argsort` direction, renormalization, `max` vs `argmax`, `nonzero`, `RandomState` re-seed, recursion base-case off-by-one, perplexity formula |
 | `mock-7-beam-search/` | **hardest** | beam-search decoder | 6 | **nested algorithmic logic** — structural (no global prune; token-list aliasing), missing-logic (no finished-beam guard; raw vs length-normalized pick), subtle indexing deep in a loop, algorithm-understanding (`prune` sort direction). Bugs interact; symptom far from cause. Self-teaching docstrings + tests. |
+| `mock-8-ngram-backoff/` | **hardest** | n-gram LM with recursive backoff | 8 | **audit gap-filler** — stale cross-method state, recursion-on-wrong-subproblem, recursion base case, `log(0)`+NaN propagation (bugs 3&4 chain), iterate-while-mutating, dict-comp key collision, `np.max` vs `np.maximum`, NamedTuple immutability. Self-teaching. |
 
-**46 bugs total.** Mocks 1–3 cover every required topic gently; mocks 4–6
+**54 bugs total.** Mocks 1–3 cover every required topic gently; mocks 4–6
 re-hit them in realistic, harder, LLM-flavored code where bugs sit in shared
 helpers and cascade; mock 7 is the closest to a real "fix this codebase"
 assessment — read its docstrings and test file to learn beam search from

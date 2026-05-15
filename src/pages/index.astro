@@ -221,6 +221,7 @@ const debugMocks = [
   { num: '5', dir: 'mock-5-attention',      title: 'Attention',       tier: 'interview',   bugs: 7, tag: 'softmax + masking' },
   { num: '6', dir: 'mock-6-sampler',        title: 'Sampler / Decoder', tier: 'interview',   bugs: 8, tag: 'temp + top-k/p + gen' },
   { num: '7', dir: 'mock-7-beam-search',    title: 'Beam Search ★',     tier: 'hardest',    bugs: 6, tag: 'nested logic — real-difficulty' },
+  { num: '8', dir: 'mock-8-ngram-backoff',  title: 'N-gram Backoff ★',  tier: 'hardest',    bugs: 8, tag: 'recursion + state + floats' },
 ];
 
 // ── General coding (the previous home content) ──
@@ -637,7 +638,7 @@ const totalConcepts = allItems.length;
     </div>
 
     <div class="section problems-section" id="dbg-mocks">
-      <h2>Practice — the 7-mock difficulty ladder</h2>
+      <h2>Practice — the 8-mock difficulty ladder</h2>
       <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
         each = a buggy module + a failing <code>test_*.py</code> + an <code>ANSWERS.md</code>.
         Fix the module, not the tests. <code>git checkout</code> to reset and re-drill.
