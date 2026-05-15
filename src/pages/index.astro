@@ -72,6 +72,18 @@ a = np.array([1, 2, 3])    # shape (3,)
 a[:, None]                 # shape (3, 1) — a COLUMN vector
 a[None, :]                 # shape (1, 3) — a ROW vector`;
 
+const paddingMaskAttentionSnippet = `# From test_attention.TestApplyPaddingMask (batch 0 walkthrough)
+scores = np.ones((2, 3, 3))
+pad_mask = np.array([[True, True, False], [True, False, False]])
+# pad_mask[0] = positions 0,1 real; position 2 padding -> mask KEY j=2 for ALL queries i
+
+# BUG: pad_mask[:, :, None] has shape (2, 3, 1). Broadcast with scores (2, 3, 3) means
+#      each cell scores[b, i, j] uses cond = pad_mask[b, i]  — QUERY index i, not KEY j.
+np.where(pad_mask[:, :, None], scores, -np.inf)
+
+# FIX: put the size-1 axis on QUERY so the same pad_mask[b, j] applies to every query i
+np.where(pad_mask[:, None, :], scores, -np.inf)`;
+
 const pythonArchetypes = `def f(x, acc=[]):          # mutable default — shared across ALL calls
 class C: log = []          # class attribute — shared across ALL instances
 def rec(...): rec(sub)     # recursion: return value DISCARDED — need return/extend
@@ -171,7 +183,36 @@ sorted(items, key=lambda x: -x.score)
 # multi-key — a tuple sorts left-to-right
 sorted(items, key=lambda x: (x.group, -x.score))   # group asc, then score desc`;
 
-// ── Debug mocks — the 6-rung difficulty ladder for Assessment 2 ──
+const floatNanSnippet = `np.log(0.0)                # -inf    (a 0 probability -> -inf logprob)
+np.log(-1.0)               # nan     (log of a negative)
+# fix: floor first -> np.log(np.clip(p, 1e-12, None))
+
+nan = float("nan")
+nan == nan                 # False!  nan compares unequal to everything
+np.max([1.0, nan])         # nan     one nan poisons the whole reduction
+# fix: np.isnan(x) to test;  np.nanmax / np.nansum to ignore nans
+
+0.1 + 0.2 == 0.3           # False   never use == on floats
+# fix: math.isclose(a, b)  or  np.isclose(a, b)  /  np.allclose`;
+
+const viewCopySnippet = `a = np.arange(6)
+
+v = a[2:5]                 # a SLICE is a VIEW — shares memory with a
+v[0] = 99                  # ...this ALSO changes a[2]!
+
+c = a[a > 2]               # fancy / boolean indexing is a COPY
+c[0] = 99                  # ...a is untouched
+
+# fix: a[2:5].copy() when you need an independent array`;
+
+const maxMaximumSnippet = `np.max(a)                  # REDUCTION   -> a scalar (the largest element)
+np.maximum(a, b)           # ELEMENTWISE -> an array  (pairwise max of a, b)
+np.maximum(a, 1e-6)        # elementwise FLOOR — clamp every element up to 1e-6
+
+# np.max(a, 1e-6) is a bug: 1e-6 is read as the 'axis' arg -> TypeError
+# same trap: np.min vs np.minimum`;
+
+// ── Debug mocks — the difficulty ladder for Assessment 2 ──
 const debugMocks = [
   { num: '1', dir: 'mock-1-eval-harness',   title: 'Eval Harness',    tier: 'onboarding',  bugs: 7, tag: 'sampling + stats' },
   { num: '2', dir: 'mock-2-token-analyzer', title: 'Token Analyzer',  tier: 'onboarding',  bugs: 6, tag: 'vocab + similarity' },
@@ -337,6 +378,7 @@ const totalConcepts = allItems.length;
       <a href="#dbg-pdb">pdb commands</a>
       <a href="#dbg-symptoms">symptom → suspect</a>
       <a href="#dbg-archetypes">bug archetypes</a>
+      <a href="#dbg-padding-mask">padding mask</a>
       <a href="#dbg-sorting">sorting</a>
       <a href="#dbg-topics">required topics</a>
       <a href="#dbg-mocks">practice</a>
@@ -403,6 +445,11 @@ const totalConcepts = allItems.length;
           <tr><td>output length off by exactly 1</td><td>recursion base case (<code>&gt;</code> vs <code>&gt;=</code>) or a loop <code>range()</code> off-by-one</td></tr>
           <tr><td>a recursive function "does nothing" / <strong>nested data is missing</strong> from the output</td><td>the recursive call's <strong>return value is discarded</strong> — need <code>return</code> / <code>.extend(...)</code></td></tr>
           <tr><td><code>KeyError</code></td><td><code>d[k]</code> should be <code>d.get(k, default)</code> — the spec names the default</td></tr>
+          <tr><td><code>RuntimeError: dictionary changed size during iteration</code> (or a loop skips elements)</td><td>mutating a dict/list <em>while iterating it</em> — iterate a <code>list(...)</code> copy, or build a new container</td></tr>
+          <tr><td><code>AttributeError: can't set attribute</code></td><td>trying to mutate a <code>NamedTuple</code> — it's immutable; use <code>obj._replace(field=...)</code></td></tr>
+          <tr><td>a "skip if nan" guard never fires, or a <code>max</code>/<code>sum</code> silently becomes <code>nan</code></td><td><code>nan != nan</code> — test with <code>np.isnan</code>; one <code>nan</code> poisons reductions — use <code>np.nanmax</code>/<code>np.nansum</code></td></tr>
+          <tr><td>you mutate a "local" array and the original changes too</td><td>a plain <strong>slice is a view</strong> — <code>.copy()</code> it (boolean/fancy indexing already copies)</td></tr>
+          <tr><td>a stale value after an update — a getter returns pre-update data</td><td>cross-method stale state — the mutating method forgot to invalidate a cache the getter reads</td></tr>
           <tr><td>every random draw identical / not reproducible</td><td>global <code>np.random</code> instead of an instance <code>RandomState</code>, or re-seeding inside a hot path</td></tr>
           <tr><td>a metric is an integer when it should be fractional</td><td><code>//</code> floor division where <code>/</code> was meant</td></tr>
           <tr><td>a probability array doesn't sum to 1</td><td>missing renormalization <em>or</em> dividing by the wrong denominator — use <code>x / x.sum()</code>, not <code>x / len(x)</code></td></tr>
@@ -454,6 +501,39 @@ const totalConcepts = allItems.length;
         <em>removes</em> dimensions (reduce over the flattened array); <code>x[..., None]</code>
         <em>adds</em> one. The index form is your broadcasting tool — it's how you turn a
         <code>(N,)</code> vector into the <code>(N,1)</code> column from the rule above.</p>
+      <h3 id="dbg-padding-mask">Padding mask on <code>scores</code> (mock-5 attention)</h3>
+      <p class="dbg-sub"><strong>Spec:</strong> <code>scores</code> shape <code>(batch, seq, seq)</code>
+        with <code>scores[b, i, j]</code> = logit for <strong>query</strong> <code>i</code> attending to
+        <strong>key</strong> <code>j</code>. <code>pad_mask</code> shape <code>(batch, seq)</code>:
+        <code>True</code> = real token, <code>False</code> = padding. A padding <strong>key</strong> at
+        position <code>j</code> must become <code>-np.inf</code> for <strong>every</strong> query
+        <code>i</code> — i.e. blank the whole <strong>key column</strong> <code>j</code> in
+        <code>scores[b, :, j]</code>.</p>
+      <Code code={paddingMaskAttentionSnippet} lang="python" theme="github-light" wrap />
+      <p><strong>Raw numbers — batch 0 only</strong> (<code>pad_mask[0] = [True, True, False]</code>,
+        all <code>scores[0, :, :]</code> start as <code>1.0</code>):</p>
+      <table class="dbg-table">
+        <thead><tr><th></th><th>key 0</th><th>key 1</th><th>key 2 (padding)</th></tr></thead>
+        <tbody>
+          <tr><th>wanted <code>scores[0]</code></th><td>1</td><td>1</td><td><code>-inf</code> for queries 0,1,2</td></tr>
+          <tr><th>buggy output</th><td>1</td><td>1</td><td><code>1, 1, -inf</code> — only query 2 masked</td></tr>
+        </tbody>
+      </table>
+      <p class="dbg-sub">The test asserts <code>np.all(out[0, :, 2] == -np.inf)</code> i.e.
+        <code>out[0, 0, 2]</code>, <code>out[0, 1, 2]</code>, <code>out[0, 2, 2]</code> must all be
+        <code>-inf</code>. With <code>pad_mask[:, :, None]</code>, cell <code>scores[0, i, 2]</code> uses
+        <code>np.where(pad_mask[0, i], …)</code> — so queries <code>0</code> and <code>1</code> read
+        <code>pad_mask[0, 0]</code> and <code>pad_mask[0, 1]</code> (both <code>True</code>) and
+        <strong>keep</strong> <code>1.0</code> at key column 2. Only query <code>2</code> reads
+        <code>pad_mask[0, 2] == False</code> and gets <code>-inf</code>.</p>
+      <table class="dbg-table">
+        <thead><tr><th></th><th>what went wrong</th><th>fix</th></tr></thead>
+        <tbody>
+          <tr><th>Bug</th><td><code>np.where(pad_mask[:, :, None], scores, -np.inf)</code></td><td>condition tied to <strong>query</strong> index <code>i</code></td></tr>
+          <tr><th>Cause</th><td colspan="2">Singleton axis is last → <code>pad_mask[b, i]</code> is copied across all keys <code>j</code> — masks by row (query), not by column (key).</td></tr>
+          <tr><th>Fix</th><td><code>np.where(pad_mask[:, None, :], scores, -np.inf)</code></td><td>singleton on <strong>query</strong> axis → <code>pad_mask[b, j]</code> applies to every <code>i</code></td></tr>
+        </tbody>
+      </table>
       <h3>Pure Python</h3>
       <Code code={pythonArchetypes} lang="python" theme="github-light" wrap />
       <h3>Recursion</h3>
@@ -504,6 +584,27 @@ const totalConcepts = allItems.length;
         <li><strong>Counts:</strong> <code>np.bincount(ids, minlength=vocab_size)</code>.</li>
         <li><strong>Ratios:</strong> chars-per-token is a float — <code>/</code>, not <code>//</code>.</li>
       </ul>
+      <h3>Floats &amp; NaN — <code>log(0)</code>, <code>nan != nan</code>, <code>==</code></h3>
+      <Code code={floatNanSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><code>log(0)</code> is <code>-inf</code>, <code>log(negative)</code> is
+        <code>nan</code> — and one <code>nan</code> poisons every <code>max</code>/<code>sum</code>/
+        <code>mean</code> downstream. <code>nan</code> also compares <em>unequal to everything,
+        including itself</em>, so a <code>if x == x</code> / "skip if nan" guard silently never
+        fires — use <code>np.isnan</code>. Never <code>==</code> floats; use
+        <code>math.isclose</code> / <code>np.isclose</code>.</p>
+      <h3>View vs. copy — slices alias, fancy-indexing copies</h3>
+      <Code code={viewCopySnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub">A plain <strong>slice is a view</strong> — mutating it mutates the
+        original (the NumPy version of mock-7's list-aliasing bug). <strong>Boolean / fancy
+        indexing returns a copy.</strong> The inconsistency is the trap: <code>.copy()</code>
+        when you need an array you can mutate freely.</p>
+      <h3><code>np.max</code> vs <code>np.maximum</code> — reduction vs. elementwise</h3>
+      <Code code={maxMaximumSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><code>np.max(a)</code> <em>reduces</em> to a scalar;
+        <code>np.maximum(a, b)</code> is <em>elementwise</em> and the go-to for clamping/flooring
+        an array. Mixing them gives a <code>TypeError</code> (the second arg is read as
+        <code>axis</code>) or a scalar where you wanted an array. Same trap:
+        <code>np.min</code>/<code>np.minimum</code>, <code>np.sum</code>/<code>np.add</code>.</p>
       <a href="#top" class="to-top">↑ top</a>
     </div>
 
