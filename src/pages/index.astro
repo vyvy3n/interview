@@ -256,6 +256,26 @@ a = np.random.RandomState(0); b = np.random.RandomState(0)
 rng.shuffle(arr)               # shuffles arr in place
 arr = rng.shuffle(arr)         # BUG: arr is now None`;
 
+const mutateIterFixesSnippet = `# Two failure shapes:
+#   dict / set:  RuntimeError: dictionary changed size during iteration   (LOUD)
+#   list:        silent skip — the next element after a removal gets jumped over
+
+# A — iterate a SNAPSHOT (one-line fix)
+for k, v in list(counts.items()):
+    if v < threshold:
+        del counts[k]
+
+# B — build a new container (often cleanest)
+counts = {k: v for k, v in counts.items() if v >= threshold}
+
+# C — collect-then-delete (when you must mutate the original)
+to_drop = [k for k, v in counts.items() if v < threshold]
+for k in to_drop:
+    del counts[k]
+
+# D — LISTS: slice-assign with a comprehension (in-place + safe)
+documents[:] = [d for d in documents if d.has_content]`;
+
 // ── Debug mocks — the difficulty ladder for Assessment 2 ──
 const debugMocks = [
   { num: '1', dir: 'mock-1-eval-harness',   title: 'Eval Harness',    tier: 'onboarding',  bugs: 7, tag: 'sampling + stats' },
@@ -652,6 +672,15 @@ const totalConcepts = allItems.length;
         or a function whose output grows across calls (mock-2's <code>merge_vocabs</code>).
         <strong>One-liner memory:</strong> <em>default <code>None</code>, build <code>[]</code>
         inside the function body.</em></p>
+      <h3>Mutate while iterating — the four fixes</h3>
+      <Code code={mutateIterFixesSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>Dict / set:</strong> mutating during iteration raises
+        <code>RuntimeError: dictionary changed size during iteration</code> — loud, easy.
+        <strong>List:</strong> mutating <em>silently skips</em> the next element after each
+        removal (the iterator's index doesn't shrink with the list) — dangerous.
+        <strong>Rule:</strong> if you'll <em>remove</em>, don't iterate the container itself —
+        iterate a <code>list(...)</code> snapshot, or build a new one with a comprehension.
+        Same-size in-place updates (<code>lst[i] = transform(lst[i])</code>) are fine.</p>
       <h3>OOV tokens — safe dict lookup in <code>encode()</code></h3>
       <Code code={oovSnippet} lang="python" theme="github-light" wrap />
       <p class="dbg-sub">After merges, tokens are still <em>strings</em> — one never seen in
