@@ -286,6 +286,7 @@ const debugMocks = [
   { num: '6', dir: 'mock-6-sampler',        title: 'Sampler / Decoder', tier: 'interview',   bugs: 8, tag: 'temp + top-k/p + gen' },
   { num: '7', dir: 'mock-7-beam-search',    title: 'Beam Search ★',     tier: 'hardest',    bugs: 6, tag: 'nested logic — real-difficulty' },
   { num: '8', dir: 'mock-8-ngram-backoff',  title: 'N-gram Backoff ★',  tier: 'hardest',    bugs: 8, tag: 'recursion + state + floats' },
+  { num: '9', dir: 'mock-9-bm25-retrieval', title: 'BM25 Retrieval ★★', tier: 'real-interview', bugs: 14, tag: '4 files · 36 tests · cross-module' },
 ];
 
 // ── General coding (the previous home content) ──
@@ -732,7 +733,7 @@ const totalConcepts = allItems.length;
     </div>
 
     <div class="section problems-section" id="dbg-mocks">
-      <h2>Practice — the 8-mock difficulty ladder</h2>
+      <h2>Practice — the 9-mock difficulty ladder</h2>
       <p style="color: var(--muted); margin: -2px 0 6px; font-size: 0.85rem;">
         each = a buggy module + a failing <code>test_*.py</code> + an <code>ANSWERS.md</code>.
         Fix the module, not the tests. <code>git checkout</code> to reset and re-drill.
@@ -751,7 +752,19 @@ const totalConcepts = allItems.length;
       </ul>
       <div class="problems-subhead">interview-realistic — LLM codebases, harder + interacting bugs</div>
       <ul class="problems-grid">
-        {debugMocks.filter(m => m.tier !== 'onboarding').map(m => (
+        {debugMocks.filter(m => m.tier === 'interview' || m.tier === 'hardest').map(m => (
+          <li>
+            <a href={`${GH_DEBUG}/${m.dir}`} target="_blank" rel="noopener" class="chip chip-six">
+              <span class="chip-num">{m.num}</span>
+              <span class="chip-title">{m.title}</span>
+              <span class="chip-tag">{m.bugs} bugs · {m.tag}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="problems-subhead">★★ real-interview tier — multi-file codebase, cross-module bugs (closest to the actual assessment)</div>
+      <ul class="problems-grid">
+        {debugMocks.filter(m => m.tier === 'real-interview').map(m => (
           <li>
             <a href={`${GH_DEBUG}/${m.dir}`} target="_blank" rel="noopener" class="chip chip-six">
               <span class="chip-num">{m.num}</span>
