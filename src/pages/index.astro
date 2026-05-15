@@ -212,6 +212,50 @@ np.maximum(a, 1e-6)        # elementwise FLOOR — clamp every element up to 1e-
 # np.max(a, 1e-6) is a bug: 1e-6 is read as the 'axis' arg -> TypeError
 # same trap: np.min vs np.minimum`;
 
+const arraySnippet = `np.array([1, 2, 3])               # 1-D, dtype int64
+np.array([[1, 2], [3, 4]])        # 2-D, shape (2, 2)
+np.array([1, 2.0, 3])             # mixed int/float -> dtype float64
+np.array([1, "x"])                # mixed with str -> dtype <U...  (a STRING array!)
+np.array([1.9, 2.9], dtype=int)   # [1, 2]  — truncates, doesn't round`;
+
+const minMaxSnippet = `a = np.array([[1, 2, 3], [4, 5, 6]])
+np.max(a)              # 6                — scalar, full reduction
+np.max(a, axis=0)      # [4, 5, 6]        — max DOWN each column
+np.max(a, axis=1)      # [3, 6]           — max ACROSS each row
+np.argmax(a)           # 5                — the FLAT index of the max
+np.argmax(a, axis=1)   # [2, 2]           — column index per row
+
+# what bites you:
+np.max([])             # ValueError       — empty array
+np.max([1.0, np.nan])  # nan              — nan poisons; use np.nanmax`;
+
+const sumSnippet = `a = np.array([[1, 2, 3], [4, 5, 6]])
+np.sum(a)                         # 21
+np.sum(a, axis=0)                 # [5, 7, 9]     — sum DOWN columns
+np.sum(a, axis=1)                 # [6, 15]       — sum ACROSS rows
+np.sum(a, axis=1, keepdims=True)  # [[6], [15]]   — shape (2, 1)  for broadcasting back
+np.sum(a > 3)                     # 3             — booleans count as 0/1`;
+
+const nonzeroSnippet = `a = np.array([0, 5, 0, 7])
+np.nonzero(a)              # (array([1, 3]),)        — a TUPLE
+np.nonzero(a)[0]           # array([1, 3])           — the 1-D index array
+
+m = np.array([[0, 1], [2, 0]])
+np.nonzero(m)              # (array([0, 1]), array([1, 0]))   — rows, then cols`;
+
+const randomStateSnippet = `rng = np.random.RandomState(seed=42)
+rng.randint(0, 10, size=5)     # reproducible: same seed -> same draw
+rng.choice([0, 1, 2], p=[0.5, 0.25, 0.25])
+rng.normal(0, 1)
+
+# Two separate instances, same seed -> identical sequences:
+a = np.random.RandomState(0); b = np.random.RandomState(0)
+[a.randint(10) for _ in range(3)] == [b.randint(10) for _ in range(3)]   # True
+
+# In-place ops return None — classic trap:
+rng.shuffle(arr)               # shuffles arr in place
+arr = rng.shuffle(arr)         # BUG: arr is now None`;
+
 // ── Debug mocks — the difficulty ladder for Assessment 2 ──
 const debugMocks = [
   { num: '1', dir: 'mock-1-eval-harness',   title: 'Eval Harness',    tier: 'onboarding',  bugs: 7, tag: 'sampling + stats' },
@@ -378,6 +422,7 @@ const totalConcepts = allItems.length;
       <a href="#dbg-loop">5-move loop</a>
       <a href="#dbg-pdb">pdb commands</a>
       <a href="#dbg-symptoms">symptom → suspect</a>
+      <a href="#dbg-numpy">NumPy walkthrough</a>
       <a href="#dbg-archetypes">bug archetypes</a>
       <a href="#dbg-padding-mask">padding mask</a>
       <a href="#dbg-sorting">sorting</a>
@@ -459,23 +504,67 @@ const totalConcepts = allItems.length;
       <a href="#top" class="to-top">↑ top</a>
     </div>
 
-    <div class="section" id="dbg-archetypes">
-      <h2>Bug archetypes — recognize on sight</h2>
-      <h3>NumPy</h3>
-      <Code code={numpyArchetypes} lang="python" theme="github-light" wrap />
-      <h3><code>np.bincount</code> — counting into a fixed-length array</h3>
+    <div class="section" id="dbg-numpy">
+      <h2>NumPy walkthrough — function by function</h2>
+      <p class="dbg-sub">Each required NumPy item: what it does, an example, and the bug shape that bites in debugging.</p>
+
+      <h3><code>np.array</code></h3>
+      <p class="dbg-sub">Turns a Python list (or list of lists) into a NumPy array. Three things to know:</p>
+      <Code code={arraySnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>What bites you:</strong> dtype coercion (one float in the list makes the whole array float; one string makes it a string array), and <strong>slice-vs-copy semantics</strong> — <code>a[2:5]</code> is a <em>view</em> (mutating it mutates <code>a</code>), but <code>a[mask]</code> (boolean indexing) is a <em>copy</em>. The inconsistency is the trap.</p>
+      <Code code={viewCopySnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><code>.copy()</code> when you need an independent array.</p>
+
+      <h3><code>np.min</code>, <code>np.max</code></h3>
+      <p class="dbg-sub">Reductions. Return the smallest / largest value. With <code>axis=</code>, reduce along that axis only.</p>
+      <Code code={minMaxSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>What bites you, in order of importance:</strong></p>
+      <ul class="tight">
+        <li><strong><code>np.max</code> (reduction) vs <code>np.maximum</code> (elementwise).</strong> <code>np.maximum(probs, 1e-6)</code> floors elementwise; <code>np.max(probs, 1e-6)</code> <em>errors</em> — the <code>1e-6</code> is read as <code>axis</code>.</li>
+        <li><strong><code>np.max</code> returns the value; <code>np.argmax</code> returns the index.</strong> Greedy decoding wants the index.</li>
+        <li><strong>Empty array</strong> → <code>ValueError</code>. <strong>NaN poisons</strong> — use <code>np.nanmax</code> to ignore.</li>
+      </ul>
+      <Code code={maxMaximumSnippet} lang="python" theme="github-light" wrap />
+
+      <h3><code>np.sum</code></h3>
+      <p class="dbg-sub">Reduction over an axis (or all elements).</p>
+      <Code code={sumSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>What bites you:</strong></p>
+      <ul class="tight">
+        <li><strong>Axis confusion.</strong> Pick <code>axis=0</code> (collapse rows → per-column) vs <code>axis=1</code> (collapse columns → per-row) by what shape you <em>want left</em>.</li>
+        <li><strong>Missing <code>keepdims=True</code></strong> — a row-wise sum gives <code>(2,)</code>, which won't broadcast back to divide the original <code>(2, 3)</code> matrix. With <code>keepdims=True</code> you get <code>(2, 1)</code> which does.</li>
+      </ul>
+      <p class="dbg-sub"><code>axis=None</code> (the default) collapses everything to a scalar; not to be confused with <code>None</code> as an <em>index</em> (which <em>adds</em> a size-1 axis — see Broadcasting below):</p>
+      <Code code={noneSnippet} lang="python" theme="github-light" wrap />
+
+      <h3><code>np.bincount</code></h3>
+      <p class="dbg-sub">Counts how many times each non-negative integer id appears.</p>
       <Code code={bincountSnippet} lang="python" theme="github-light" wrap />
-      <p class="dbg-sub"><code>np.bincount</code> needs <strong>non-negative integers</strong> —
-        a float <code>ids</code> array raises <code>TypeError</code>, a negative id raises
-        <code>ValueError</code>; if you see those at a <code>bincount</code> line, the bug is in
-        what <code>encode()</code> returned. With <strong><code>weights=</code></strong> it
-        returns a <em>float</em> array (summed weights per bin), not int counts — so a
-        <code>dtype</code> assertion can fail (mock-1's <code>empirical_means</code>). Reach for
-        <code>minlength=</code> 90% of the time; reach for <code>np.zeros</code> +
-        <code>np.add.at</code> when an id might exceed <code>V</code> or you want the length
-        guaranteed.</p>
-      <h3>Broadcasting — divide rows vs. columns by a vector</h3>
-      <p class="dbg-sub">The single most common broadcasting fix. Memorize which one needs the reshape.</p>
+      <p class="dbg-sub"><strong>What bites you:</strong> <strong>length surprise</strong> — output is <code>max(ids)+1</code>, <em>not</em> the vocab size; if the highest-id token never appears, the array is too short — fix with <code>minlength=V</code>. <code>minlength</code> only <em>extends</em>, never <em>truncates</em>: an id <code>≥ V</code> means the real bug is upstream in whatever produced <code>ids</code>. Needs non-negative ints — floats raise <code>TypeError</code>, negatives raise <code>ValueError</code>. With <code>weights=</code> it returns <em>floats</em>, breaking any <code>dtype == int</code> assertion (mock-1's <code>empirical_means</code>).</p>
+
+      <h3><code>np.nonzero</code></h3>
+      <p class="dbg-sub">Returns the indices where the input is truthy / nonzero — <strong>as a tuple, one array per dimension</strong>.</p>
+      <Code code={nonzeroSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>What bites you:</strong> the <strong>tuple return</strong>. <code>arr.ndim</code> on the tuple → <code>AttributeError: 'tuple' has no attribute 'ndim'</code>. Index with <code>[0]</code> for a 1-D input.</p>
+
+      <h3><code>np.where</code> — two modes, one name</h3>
+      <p class="dbg-sub"><strong>Two completely different operations</strong> sharing one name:</p>
+      <Code code={whereSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>3-arg = replace, 1-arg = locate.</strong> Confusing the two modes (or forgetting <code>[0]</code> after the 1-arg form) is one of the most common NumPy bugs. The 3-arg form is also your tool for <em>masking with <code>-inf</code></em> in attention — but the masked axis must be inserted at the right place:</p>
+      <Code code={paddingMaskAttentionSnippet} lang="python" theme="github-light" wrap />
+
+      <h3><code>np.random.RandomState</code></h3>
+      <p class="dbg-sub">A <em>seedable RNG instance</em>. The point: keep randomness isolated and reproducible — don't touch the global <code>np.random</code>.</p>
+      <Code code={randomStateSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>What bites you:</strong></p>
+      <ul class="tight">
+        <li><strong>Using <code>np.random.randint(...)</code> (global)</strong> instead of <code>rng.randint(...)</code> (instance) → not reproducible; any <code>np.random.seed()</code> elsewhere leaks in.</li>
+        <li><strong>Re-seeding inside a hot path</strong> (<code>rng = np.random.RandomState(seed)</code> <em>inside</em> <code>sample()</code> instead of <code>__init__</code>) → every call resets the stream; every "random" draw is identical.</li>
+        <li><strong><code>.shuffle()</code> returns <code>None</code></strong> (mutates in place) — <code>x = rng.shuffle(arr)</code> gives you <code>None</code>.</li>
+      </ul>
+
+      <h3>Broadcasting</h3>
+      <p class="dbg-sub">How NumPy applies an operation to arrays of different shapes. <strong>Aligns the trailing axes</strong>; a size-1 axis "stretches" to match.</p>
       <Code code={broadcastSnippet} lang="python" theme="github-light" wrap />
       <table class="dbg-table">
         <thead><tr><th>goal</th><th>vector length</th><th>vector shape needed</th></tr></thead>
@@ -484,24 +573,21 @@ const totalConcepts = allItems.length;
           <tr><td>divide each <strong>column</strong> by <code>v[j]</code></td><td>= num cols</td><td>1-D <code>(N,)</code> is fine — broadcasts as-is</td></tr>
         </tbody>
       </table>
-      <p class="dbg-sub"><strong>Rule:</strong> a vector broadcasts against the matrix's
-        <em>trailing</em> axis. Columns already line up <code>(N,)</code>; rows need an explicit
-        column shape <code>(N,1)</code>. This is the same fix as <code>keepdims=True</code> after a
-        row-wise <code>sum</code> — and exactly the bug in mock-5's <code>normalize_rows</code>.</p>
-      <h3>The two modes of <code>np.where</code></h3>
-      <Code code={whereSnippet} lang="python" theme="github-light" wrap />
-      <p class="dbg-sub"><strong>3-arg = replace, 1-arg = locate.</strong>
-        <code>np.where(cond, x, y)</code> is a vectorized if-else — same shape out, each
-        element picked from <code>x</code> or <code>y</code>. <code>np.where(cond)</code> is
-        just <code>np.nonzero</code> — a <em>tuple</em> of index arrays; index <code>[0]</code>
-        for the 1-D case. Mixing up the two modes (or forgetting the <code>[0]</code>) is one
-        of the most common NumPy bugs — it's in mock-2 and mock-6.</p>
-      <h3>The two meanings of <code>None</code> in NumPy</h3>
-      <Code code={noneSnippet} lang="python" theme="github-light" wrap />
-      <p class="dbg-sub"><strong>Don't confuse them:</strong> <code>axis=None</code>
-        <em>removes</em> dimensions (reduce over the flattened array); <code>x[..., None]</code>
-        <em>adds</em> one. The index form is your broadcasting tool — it's how you turn a
-        <code>(N,)</code> vector into the <code>(N,1)</code> column from the rule above.</p>
+      <p class="dbg-sub"><strong>Rule:</strong> a vector broadcasts against the matrix's <em>trailing</em> axis. Columns already line up <code>(N,)</code>; rows need an explicit column shape <code>(N,1)</code>. Same fix as <code>keepdims=True</code> after a row-wise <code>sum</code>. <strong>What bites you:</strong> silent wrong-broadcasting when shapes happen to be compatible (e.g. a square matrix where row-sum vs column-sum both broadcast but produce different results).</p>
+
+      <h3>Floating point</h3>
+      <p class="dbg-sub">The numerical traps that break tests with <code>nan</code>, <code>inf</code>, or "almost equal but not quite":</p>
+      <Code code={floatNanSnippet} lang="python" theme="github-light" wrap />
+      <p class="dbg-sub"><strong>What bites you in tests:</strong> a <code>nan</code> upstream propagates through every <code>mean</code>/<code>sum</code>/<code>max</code> and pops out as a <code>nan</code> in an assertion you can't trace. The fix is almost always at the source: <strong>subtract the max before <code>exp</code></strong> (stable softmax), <strong>clip before <code>log</code></strong>, or <strong>use <code>np.nanmax</code>/<code>np.nansum</code></strong> to ignore the nans.</p>
+      <a href="#top" class="to-top">↑ top</a>
+    </div>
+
+    <div class="section" id="dbg-archetypes">
+      <h2>Bug archetypes — recognize on sight</h2>
+      <h3>NumPy</h3>
+      <p class="dbg-sub">At-a-glance one-liners. Full deep-dive in the
+        <a href="#dbg-numpy">NumPy walkthrough</a> above.</p>
+      <Code code={numpyArchetypes} lang="python" theme="github-light" wrap />
       <h3 id="dbg-padding-mask">Padding mask on <code>scores</code> (mock-5 attention)</h3>
       <p class="dbg-sub"><strong>Spec:</strong> <code>scores</code> shape <code>(batch, seq, seq)</code>
         with <code>scores[b, i, j]</code> = logit for <strong>query</strong> <code>i</code> attending to
@@ -585,27 +671,6 @@ const totalConcepts = allItems.length;
         <li><strong>Counts:</strong> <code>np.bincount(ids, minlength=vocab_size)</code>.</li>
         <li><strong>Ratios:</strong> chars-per-token is a float — <code>/</code>, not <code>//</code>.</li>
       </ul>
-      <h3>Floats &amp; NaN — <code>log(0)</code>, <code>nan != nan</code>, <code>==</code></h3>
-      <Code code={floatNanSnippet} lang="python" theme="github-light" wrap />
-      <p class="dbg-sub"><code>log(0)</code> is <code>-inf</code>, <code>log(negative)</code> is
-        <code>nan</code> — and one <code>nan</code> poisons every <code>max</code>/<code>sum</code>/
-        <code>mean</code> downstream. <code>nan</code> also compares <em>unequal to everything,
-        including itself</em>, so a <code>if x == x</code> / "skip if nan" guard silently never
-        fires — use <code>np.isnan</code>. Never <code>==</code> floats; use
-        <code>math.isclose</code> / <code>np.isclose</code>.</p>
-      <h3>View vs. copy — slices alias, fancy-indexing copies</h3>
-      <Code code={viewCopySnippet} lang="python" theme="github-light" wrap />
-      <p class="dbg-sub">A plain <strong>slice is a view</strong> — mutating it mutates the
-        original (the NumPy version of mock-7's list-aliasing bug). <strong>Boolean / fancy
-        indexing returns a copy.</strong> The inconsistency is the trap: <code>.copy()</code>
-        when you need an array you can mutate freely.</p>
-      <h3><code>np.max</code> vs <code>np.maximum</code> — reduction vs. elementwise</h3>
-      <Code code={maxMaximumSnippet} lang="python" theme="github-light" wrap />
-      <p class="dbg-sub"><code>np.max(a)</code> <em>reduces</em> to a scalar;
-        <code>np.maximum(a, b)</code> is <em>elementwise</em> and the go-to for clamping/flooring
-        an array. Mixing them gives a <code>TypeError</code> (the second arg is read as
-        <code>axis</code>) or a scalar where you wanted an array. Same trap:
-        <code>np.min</code>/<code>np.minimum</code>, <code>np.sum</code>/<code>np.add</code>.</p>
       <a href="#top" class="to-top">↑ top</a>
     </div>
 
